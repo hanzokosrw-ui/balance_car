@@ -1,6 +1,0 @@
-#ifndef __TIME_H
-#define __TIME_H
-
-#include "main.h"
-
-#endif /* __TIME_H */
