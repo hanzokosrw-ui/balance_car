@@ -469,8 +469,9 @@ int IRDM_turn(float turn_diff, float gyro)
 	float Turn;
 
 	// 折算：轮速差→遥控转向幅度（右转为正，左转为负），再套用遥控 PD 结构
-	Turn = -(turn_diff / Turn90Angle) * Turn_Amplitude * Turn_Kp / 100
-	       - gyro * Turn_Kd / 100;
+	// 注：若巡线转向方向相反，改这里正负号即可（当前已按实测方向修正）
+	Turn = -((turn_diff / Turn90Angle) * Turn_Amplitude * Turn_Kp / 100
+	       - gyro * Turn_Kd / 100);
 
 	return (int)Turn;
 }
