@@ -164,8 +164,8 @@ Output  : Turn control PWM
 **************************************************************************/
 int Turn(float gyro)
 {
-	 static float Turn_Target,turn,Turn_Amplitude=54;
-	 float Kp=Turn_Kp,Kd;			//修改转向速度，请修改Turn_Amplitude即可
+	 static float Turn_Target,turn;
+	 float Kp=Turn_Kp,Kd;			//修改转向速度，请修改Turn_Amplitude即可（全局，与巡线共用）
 	//===================遥控左右旋转部分=================//
 	 if(1==Flag_Left)	        Turn_Target=-Turn_Amplitude/Flag_velocity;
 	 else if(1==Flag_Right)	  Turn_Target=Turn_Amplitude/Flag_velocity; 
@@ -456,18 +456,23 @@ void IRDM_Mode(void)
 
 /**************************************************************************
 Function: IRDM_turn
-Input   : turn_diff：转向差速；gyro：Z轴陀螺仪
+Input   : turn_diff：轮速差(mm/s)；gyro：Z轴陀螺仪
 Output  : 转向控制PWM（右转为正，左转为负）
-函数功能：红外循迹模式转向控制（PD）
+函数功能：红外循迹模式转向控制
+         与遥控转向 Turn() 共用 Turn_Amplitude/Turn_Kp/Turn_Kd，
+         把轮速差(0~Turn90Angle)折算成遥控转向幅度(0~Turn_Amplitude)
 入口参数：无
 返回  值：无
 **************************************************************************/
 int IRDM_turn(float turn_diff, float gyro)
 {
 	float Turn;
-	float Kp = 60, Kd = 0.2;                 //转向PD参数，可调
-	Turn = -turn_diff * Kp - gyro * Kd;      //右转为正
-	return Turn;
+
+	// 折算：轮速差→遥控转向幅度（右转为正，左转为负），再套用遥控 PD 结构
+	Turn = -(turn_diff / Turn90Angle) * Turn_Amplitude * Turn_Kp / 100
+	       - gyro * Turn_Kd / 100;
+
+	return (int)Turn;
 }
 
 

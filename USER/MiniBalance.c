@@ -9,7 +9,7 @@ u8 Way_Angle=2;                             //获取角度的算法，1：四元数  2：卡尔
 u16 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity=2,Target_Velocity=300; //蓝牙遥控相关的变量
 float RC_Velocity,RC_Turn_Velocity;			    //遥控控制的速度
 u8 Flag_Stop=1,Flag_Show=0;                 //电机停止标志位和显示标志位  默认停止 显示打开
-u8 Mode = 0;								                //模式选择，默认是普通的控制模式
+u8 Mode = IRDM_Line_Patrol_Mode;                    //模式选择，默认红外巡线模式
 float Move_X,Move_Z;                        //控制小车避障、跟随时前进的变量，转弯的变量
 int Encoder_Left,Encoder_Right;             //左右编码器的脉冲计数
 int Motor_Left,Motor_Right;                 //电机PWM变量 应是Motor的 向Moto致敬	
@@ -20,7 +20,7 @@ u32 Distance;                               //雷达测距
 u8 delay_50,PID_Send; 						//延时和调参相关变量
 volatile u8 delay_flag;
 float Acceleration_Z;                         //Z轴加速度计  
-float Balance_Kp=27000,Balance_Kd=110,Velocity_Kp=400,Velocity_Ki=2,Turn_Kp=4200,Turn_Kd=100;//PID参数（放大100倍）
+float Balance_Kp=27000,Balance_Kd=110,Velocity_Kp=400,Velocity_Ki=2,Turn_Kp=42,Turn_Kd=10,Turn_Amplitude=54;//PID参数（放大100倍）
 float Distance_KP =250,Distance_KD =10000;//距离调整PID参数
 int main(void)
 { 

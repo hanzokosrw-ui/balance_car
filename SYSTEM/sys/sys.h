@@ -128,7 +128,7 @@ extern float Move_X,Move_Z;
 extern u8 delay_50,PID_Send;
 extern volatile u8 delay_flag;
 extern float Acceleration_Z;                       //Z轴加速度计  
-extern float Balance_Kp,Balance_Kd,Velocity_Kp,Velocity_Ki,Turn_Kp,Turn_Kd;
+extern float Balance_Kp,Balance_Kd,Velocity_Kp,Velocity_Ki,Turn_Kp,Turn_Kd,Turn_Amplitude;
 extern float Distance_KP ,Distance_KD  ,Distance_KI ;	//距离调整PID参数
 /////////////////////////////////////////////////////////////////  
 void Stm32_Clock_Init(u8 PLL);  //时钟初始化  
