@@ -20,7 +20,7 @@ u32 Distance;                               //雷达测距
 u8 delay_50,PID_Send; 						//延时和调参相关变量
 volatile u8 delay_flag;
 float Acceleration_Z;                         //Z轴加速度计  
-float Balance_Kp=27000,Balance_Kd=110,Velocity_Kp=400,Velocity_Ki=2,Turn_Kp=420,Turn_Kd=100,Turn_Amplitude=54;//PID参数（放大100倍）
+float Balance_Kp=27000,Balance_Kd=110,Velocity_Kp=400,Velocity_Ki=2,Turn_Kp=3000,Turn_Kd=0,Turn_Amplitude=100;//PID参数（放大100倍）
 float Distance_KP =250,Distance_KD =10000;//距离调整PID参数
 int main(void)
 { 

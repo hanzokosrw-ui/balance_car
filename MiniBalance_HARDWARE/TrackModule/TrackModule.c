@@ -6,20 +6,25 @@ float TurnMaxAngle = 65;   // 大弯道转向参数
 float TurnMidAngle = 40;   // 中等转向参数（丢线时使用）
 float TurnMinAngle = 15;   // 微调转向参数
 // 速度参数
-float BaseSpeed = 10;      // 基础巡线速度（直行时的速度）
-float ForwardLimit = 50;		//前行限制(转向大于该值限制其前进)
+float BaseSpeed = 300;      // 基础巡线速度（直行时的速度）
+float ForwardLimit = 400;		//前行限制(转向大于该值限制其前进)
 // ===== 传感器状态定义--识别到黑线时为1 =====
 typedef enum {
     STATE_CROSS         = 0,    // 0000 - 十字路口
-    STATE_LEFT_90_A     = 1,    // 0001 - 左直角弯
+    STATE_LEFT_90_A     = 1,    // 0001 - 左直角
+    STATE_LEFT_INNER    = 2,    // 0010 - 仅左内传感器（偏左微调）
+    
 	STATE_LEFT_90_B		= 3,	// 0011
-    STATE_RIGHT_90_A    = 8,  	// 1000 - 右直角弯
-	STATE_RIGHT_90_B    = 12,	// 1100
+    STATE_RIGHT_INNER   = 4,    // 0100 - 仅右内传感器（偏右微调）
+    STATE_STRAIGHT_MID  = 6,    // 0110 - 内侧两传感器对称（直行）
     STATE_LEFT_BIG      = 7,    // 0111 - 左大弯
-    STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
-    STATE_LEFT_SMALL    = 11,   // 1011 - 左微调
-    STATE_RIGHT_SMALL   = 13,   // 1101 - 右微调
+    STATE_RIGHT_90_A    = 8,  	// 1000 - 右直角弯
     STATE_STRAIGHT      = 9,    // 1001 - 直行
+    STATE_DIAG_RIGHT    = 10,   // 1010 - DH1+DH3 对角偏右
+    STATE_LEFT_SMALL    = 11,   // 1011 - 左微调
+    STATE_RIGHT_90_B    = 12,	// 1100
+    STATE_RIGHT_SMALL   = 13,   // 1101 - 右微调
+    STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
 
@@ -38,6 +43,18 @@ void IRDM_line_inspection(void)
     {
        case STATE_CROSS:// 交叉路口处理
 			turn_diff = 0;
+            break;
+        case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
+            turn_diff = TurnMinAngle;
+            break;
+        case STATE_RIGHT_INNER: // 仅右内传感器，偏右微调
+            turn_diff = -TurnMinAngle;
+            break;
+        case STATE_STRAIGHT_MID: // 内侧两传感器对称，直行
+            turn_diff = 0;
+            break;
+        case STATE_DIAG_RIGHT: // DH1+DH3 对角偏右
+            turn_diff = -TurnMinAngle;
             break;
         case STATE_LEFT_90_A: // 左直角弯
 		case STATE_LEFT_90_B: // 左直角弯

@@ -30,9 +30,9 @@ void oled_show(void)
 	OLED_ShowString(52,16,"ST:");
 	switch(truth_value & 0x0F)				// Æ«×óL/Æ«ÓÒR/¾ÓÖÐM
 	{
-		case 9:								OLED_ShowString(66,16,"M"); break;	// ¾ÓÖÐ(1001)
-		case 1: case 3: case 7: case 11:	OLED_ShowString(66,16,"L"); break;	// Æ«×ó
-		case 8: case 12: case 14: case 13:	OLED_ShowString(66,16,"R"); break;	// Æ«ÓÒ
+		case 6: case 9:						OLED_ShowString(66,16,"M"); break;	// ¾ÓÖÐ(0110/1001)
+		case 1: case 2: case 3: case 7: case 11:	OLED_ShowString(66,16,"L"); break;	// Æ«×ó
+		case 4: case 8: case 10: case 12: case 13: case 14:	OLED_ShowString(66,16,"R"); break;	// Æ«ÓÒ
 		default:							OLED_ShowString(66,16,"-"); break;	// Ê®×Ö/¶ªÏß
 	}
 	
