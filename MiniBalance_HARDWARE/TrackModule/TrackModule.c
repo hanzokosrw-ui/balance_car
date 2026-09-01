@@ -44,7 +44,7 @@ void IRDM_line_inspection(void)
     {
        case STATE_END:// 终点停车：直接切回普通模式
 			turn_diff = 0;
-			Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
+			//Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
