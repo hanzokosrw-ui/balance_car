@@ -96,3 +96,4 @@ unsigned char DataScope_Data_Generate(unsigned char Channel_Number)
 	return 0;
 }
 
+	
