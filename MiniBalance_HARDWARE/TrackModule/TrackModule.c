@@ -1,4 +1,5 @@
 #include "TrackModule.h"
+#include "control.h"
 // ===== 可调参数区域 =====
 // 转向角度参数
 float Turn90Angle  = 80;   // 直角弯转向参数
@@ -10,7 +11,7 @@ float BaseSpeed = 300;      // 基础巡线速度（直行时的速度）
 float ForwardLimit = 400;		//前行限制(转向大于该值限制其前进)
 // ===== 传感器状态定义--识别到黑线时为1 =====
 typedef enum {
-    STATE_CROSS         = 0,    // 0000 - 十字路口
+    STATE_END         = 0,    // 0000 - 十字路口
     STATE_LEFT_90_A     = 1,    // 0001 - 左直角
     STATE_LEFT_INNER    = 2,    // 0010 - 仅左内传感器（偏左微调）
     
@@ -41,8 +42,9 @@ void IRDM_line_inspection(void)
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
-       case STATE_CROSS:// 交叉路口处理
+       case STATE_END:// 终点停车：直接切回普通模式
 			turn_diff = 0;
+			Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;

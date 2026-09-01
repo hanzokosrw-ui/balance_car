@@ -1,6 +1,7 @@
 
 #include "show.h"
 #include "TrackModule.h"
+#include "control.h"
 float Velocity_Left,Velocity_Right;	//车轮速度(mm/s)
 // Function: OLED display - OLED显示
 void oled_show(void)
@@ -47,6 +48,15 @@ void oled_show(void)
 	if(turn_diff<0)			OLED_ShowString(80,32,"-");
 	else					OLED_ShowString(80,32,"+");
 	OLED_ShowNumber(86,32,myabs((int)turn_diff),2,12);
+	switch(Mode)								// 当前模式名
+	{
+		case Normal_Mode:				OLED_ShowString(100,32,"NOR"); break;	// 普通
+		case ROS_Mode:					OLED_ShowString(100,32,"ROS"); break;
+		case Ultrasonic_Avoid_Mode:		OLED_ShowString(100,32,"AVD"); break;	// 避障
+		case Ultrasonic_Follow_Mode:	OLED_ShowString(100,32,"FLW"); break;	// 跟随
+		case IRDM_Line_Patrol_Mode:		OLED_ShowString(100,32,"TRK"); break;	// 巡线
+		default:						OLED_ShowNumber(100,32,Mode,1,12); break;
+	}
 
 	//===========第四行：左右电机 PWM L/R=====================//
 	OLED_ShowString(0,48,"L:");
