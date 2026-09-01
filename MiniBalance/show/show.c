@@ -28,7 +28,13 @@ void oled_show(void)
 	OLED_ShowNumber(36,16,(truth_value >> 1) & 0x01,1,12);
 	OLED_ShowNumber(42,16,truth_value & 0x01,1,12);
 	OLED_ShowString(52,16,"ST:");
-	OLED_ShowNumber(68,16,truth_value,2,12);
+	switch(truth_value & 0x0F)				// 偏左L/偏右R/居中M
+	{
+		case 9:								OLED_ShowString(66,16,"M"); break;	// 居中(1001)
+		case 1: case 3: case 7: case 11:	OLED_ShowString(66,16,"L"); break;	// 偏左
+		case 8: case 12: case 14: case 13:	OLED_ShowString(66,16,"R"); break;	// 偏右
+		default:							OLED_ShowString(66,16,"-"); break;	// 十字/丢线
+	}
 	
 	//===========第三行：模式 M 巡线速度 V 转向差速 D==========//
 	OLED_ShowString(0,32,"M:");
