@@ -41,6 +41,7 @@ void Choose(int encoder_left,int encoder_right);
 void Select_Zhongzhi(void);
 void IRDM_Mode(void);
 int IRDM_turn(float turn_diff,float gyro);
+void Avoid_State_Machine(void);
 extern short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
 #endif

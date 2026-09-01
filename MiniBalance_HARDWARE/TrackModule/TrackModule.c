@@ -122,6 +122,13 @@ void TrackModule_Init(void)
     GPIO_Init(TRACK_GPIO_PORT2, &GPIO_InitStructure);
 }
 
+// Function: IRDM_Line_Seen - 判断是否检测到线（绕障后找线用）
+u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
+{
+	int s = (DH1<<3)|(DH2<<2)|(DH3<<1)|DH4;
+	return (s != STATE_LOST && s != STATE_END);
+}
+
 
 
 
