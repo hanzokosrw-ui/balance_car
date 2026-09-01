@@ -84,7 +84,7 @@ void IRDM_line_inspection(void)
 			// else if (last_state == STATE_RIGHT_SMALL) turn_diff = -TurnMidAngle;//继续右转
 			// else if(last_state == STATE_LEFT_BIG ) turn_diff = TurnMaxAngle;//继续左转
 			// else if(last_state == STATE_RIGHT_BIG ) turn_diff = -TurnMaxAngle;//继续右转
-            turn_diff = 0;//暂时先直行
+            turn_diff = last_state;
             break;
         default: // 未定义状态，直行
             turn_diff = 0;
@@ -93,7 +93,7 @@ void IRDM_line_inspection(void)
 	//保存传感器状态
 	if(sensor_state!=STATE_LOST)
 	{
-		last_state=sensor_state;
+		last_state=turn_diff;
 	}
 	// 转向速度越大，基础速度越低
 	if(fabs(turn_diff)<ForwardLimit)
