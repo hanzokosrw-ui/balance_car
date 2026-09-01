@@ -1,34 +1,7 @@
-/***********************************************
-¹«Ë¾£ºÂÖÈ¤¿Æ¼¼(¶«İ¸)ÓĞÏŞ¹«Ë¾
-Æ·ÅÆ£ºWHEELTEC
-¹ÙÍø£ºwheeltec.net
-ÌÔ±¦µêÆÌ£ºshop114407458.taobao.com 
-ËÙÂôÍ¨: https://minibalance.aliexpress.com/store/4455017
-°æ±¾£ºV1.0
-ĞŞ¸ÄÊ±¼ä£º2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update£º2022-09-05
-
-All rights reserved
-***********************************************/
 #include "control.h"	
 #include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
-/**************************************************************************
-Function: Control function
-Input   : none
-Output  : none
-º¯Êı¹¦ÄÜ£ºËùÓĞµÄ¿ØÖÆ´úÂë¶¼ÔÚÕâÀïÃæ
-         5msÍâ²¿ÖĞ¶ÏÓÉMPU6050µÄINTÒı½Å´¥·¢
-         ÑÏ¸ñ±£Ö¤²ÉÑùºÍÊı¾İ´¦ÀíµÄÊ±¼äÍ¬²½	
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ				 
-**************************************************************************/
+// Function: Control function - ËùÓĞµÄ¿ØÖÆ´úÂë¶¼ÔÚÕâÀïÃæ
 int EXTI9_5_IRQHandler(void) 
 { 
 	static int Voltage_Temp,Voltage_Count,Voltage_All;		//µçÑ¹²âÁ¿Ïà¹Ø±äÁ¿
@@ -91,14 +64,7 @@ int EXTI9_5_IRQHandler(void)
 	 return 0;	  
 } 
 
-/**************************************************************************
-Function: Vertical PD control
-Input   : Angle:angle£»Gyro£ºangular velocity
-Output  : balance£ºVertical control PWM
-º¯Êı¹¦ÄÜ£ºÖ±Á¢PD¿ØÖÆ		
-Èë¿Ú²ÎÊı£ºAngle:½Ç¶È£»Gyro£º½ÇËÙ¶È
-·µ»Ø  Öµ£ºbalance£ºÖ±Á¢¿ØÖÆPWM
-**************************************************************************/	
+// Function: Vertical PD control - Ö±Á¢PD¿ØÖÆ	
 int Balance(float Angle,float Gyro)
 {  
    float Angle_bias,Gyro_bias;
@@ -109,14 +75,7 @@ int Balance(float Angle,float Gyro)
 	 return balance;
 }
 
-/**************************************************************************
-Function: Speed PI control
-Input   : encoder_left£ºLeft wheel encoder reading£»encoder_right£ºRight wheel encoder reading
-Output  : Speed control PWM
-º¯Êı¹¦ÄÜ£ºËÙ¶È¿ØÖÆPWM		
-Èë¿Ú²ÎÊı£ºencoder_left£º×óÂÖ±àÂëÆ÷¶ÁÊı£»encoder_right£ºÓÒÂÖ±àÂëÆ÷¶ÁÊı
-·µ»Ø  Öµ£ºËÙ¶È¿ØÖÆPWM
-**************************************************************************/
+// Function: Speed PI control - ËÙ¶È¿ØÖÆPWM
 int Velocity(int encoder_left,int encoder_right)
 {  
     static float velocity,Encoder_Least,Encoder_bias,Movement;
@@ -153,15 +112,7 @@ int Velocity(int encoder_left,int encoder_right)
 		if(Turn_Off(Angle_Balance,Voltage)==1||Flag_Stop==1) Encoder_Integral=0;//µç»ú¹Ø±ÕºóÇå³ı»ı·Ö
 	  return velocity;
 }
-/**************************************************************************
-Function: Turn control
-Input   : Z-axis angular velocity
-Output  : Turn control PWM
-º¯Êı¹¦ÄÜ£º×ªÏò¿ØÖÆ 
-Èë¿Ú²ÎÊı£ºZÖáÍÓÂİÒÇ
-·µ»Ø  Öµ£º×ªÏò¿ØÖÆPWM
-×÷    Õß£ºÂÖÈ¤¿Æ¼¼£¨¶«İ¸£©ÓĞÏŞ¹«Ë¾
-**************************************************************************/
+// Function: Turn control - ×ªÏò¿ØÖÆ
 int Turn(float gyro)
 {
 	 static float Turn_Target,turn;
@@ -182,14 +133,7 @@ int Turn(float gyro)
 	 return turn;								 				 //×ªÏò»·PWMÓÒ×ªÎªÕı£¬×ó×ªÎª¸º
 }
 
-/**************************************************************************
-Function: Assign to PWM register
-Input   : motor_left£ºLeft wheel PWM£»motor_right£ºRight wheel PWM
-Output  : none
-º¯Êı¹¦ÄÜ£º¸³Öµ¸øPWM¼Ä´æÆ÷
-Èë¿Ú²ÎÊı£º×óÂÖPWM¡¢ÓÒÂÖPWM
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/
+// Function: Assign to PWM register - ¸³Öµ¸øPWM¼Ä´æÆ÷
 void Set_Pwm(int motor_left,int motor_right)
 {
   if(motor_left>0)		
@@ -213,14 +157,7 @@ void Set_Pwm(int motor_left,int motor_right)
 		PWMB_IN2=7200+motor_right;
 	}//ÓÒÂÖºóÍË
 }
-/**************************************************************************
-Function: PWM limiting range
-Input   : IN£ºInput  max£ºMaximum value  min£ºMinimum value
-Output  : Output
-º¯Êı¹¦ÄÜ£ºÏŞÖÆPWM¸³Öµ 
-Èë¿Ú²ÎÊı£ºIN£ºÊäÈë²ÎÊı  max£ºÏŞ·ù×î´óÖµ  min£ºÏŞ·ù×îĞ¡Öµ
-·µ»Ø  Öµ£ºÏŞ·ùºóµÄÖµ
-**************************************************************************/
+// Function: PWM limiting range - ÏŞÖÆPWM¸³Öµ
 int PWM_Limit(int IN,int max,int min)
 {
 	int OUT = IN;
@@ -230,14 +167,7 @@ int PWM_Limit(int IN,int max,int min)
 }
 
 
-/**************************************************************************
-Function: If abnormal, turn off the motor
-Input   : angle£ºCar inclination£»voltage£ºVoltage
-Output  : 1£ºabnormal£»0£ºnormal
-º¯Êı¹¦ÄÜ£ºÒì³£¹Ø±Õµç»ú		
-Èë¿Ú²ÎÊı£ºangle£ºĞ¡³µÇã½Ç£»voltage£ºµçÑ¹
-·µ»Ø  Öµ£º1£ºÒì³£  0£ºÕı³£
-**************************************************************************/	
+// Function: If abnormal, turn off the motor - Òì³£¹Ø±Õµç»ú	
 u8 Turn_Off(float angle, int voltage)
 {
 	u8 temp;
@@ -256,14 +186,7 @@ u8 Turn_Off(float angle, int voltage)
 	return temp;			
 }
 	
-/**************************************************************************
-Function: Get angle
-Input   : way£ºThe algorithm of getting angle 1£ºDMP  2£ºkalman  3£ºComplementary filtering
-Output  : none
-º¯Êı¹¦ÄÜ£º»ñÈ¡½Ç¶È	
-Èë¿Ú²ÎÊı£ºway£º»ñÈ¡½Ç¶ÈµÄËã·¨ 1£ºDMP  2£º¿¨¶ûÂü 3£º»¥²¹ÂË²¨
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/	
+// Function: Get angle - »ñÈ¡½Ç¶È	
 void Get_Angle(u8 way)
 { 
   float gyro_x,gyro_y;
@@ -310,14 +233,7 @@ void Get_Angle(u8 way)
 		Acceleration_Z=Accel_Z;                           //¸üĞÂZÖá¼ÓËÙ¶È¼Æ	
 	}
 }
-/**************************************************************************
-Function: Absolute value function
-Input   : a£ºNumber to be converted
-Output  : unsigned int
-º¯Êı¹¦ÄÜ£º¾ø¶ÔÖµº¯Êı
-Èë¿Ú²ÎÊı£ºa£ºĞèÒª¼ÆËã¾ø¶ÔÖµµÄÊı
-·µ»Ø  Öµ£ºÎŞ·ûºÅÕûĞÍ
-**************************************************************************/	
+// Function: Absolute value function - ¾ø¶ÔÖµº¯Êı	
 int myabs(int a)
 { 		   
 	int temp;
@@ -325,19 +241,8 @@ int myabs(int a)
 	else temp=a;
 	return temp;
 }
-/**************************************************************************
-Function: Check whether the car is picked up
-Input   : Acceleration£ºZ-axis acceleration£»Angle£ºThe angle of balance£»encoder_left£ºLeft encoder count£»encoder_right£ºRight encoder count
-Output  : 1£ºpicked up  0£ºNo action
-º¯Êı¹¦ÄÜ£º¼ì²âĞ¡³µÊÇ·ñ±»ÄÃÆğ
-Èë¿Ú²ÎÊı£ºAcceleration£ºzÖá¼ÓËÙ¶È£»Angle£ºÆ½ºâµÄ½Ç¶È£»encoder_left£º×ó±àÂëÆ÷¼ÆÊı£»encoder_right£ºÓÒ±àÂëÆ÷¼ÆÊı
-·µ»Ø  Öµ£º1:Ğ¡³µ±»ÄÃÆğ  0£ºĞ¡³µÎ´±»ÄÃÆğ
-**************************************************************************/
-/**************************************************************************
-º¯Êı¹¦ÄÜ£º¼ì²âĞ¡³µÊÇ·ñ±»ÄÃÆğ
-Èë¿Ú²ÎÊı£ºint
-·µ»Ø  Öµ£ºunsigned int
-**************************************************************************/
+// Function: Check whether the car is picked up - ¼ì²âĞ¡³µÊÇ·ñ±»ÄÃÆğ
+// ===== º¯Êı¹¦ÄÜ£º¼ì²âĞ¡³µÊÇ·ñ±»ÄÃÆğ =====
 int Pick_Up(float Acceleration,float Angle,int encoder_left,int encoder_right)
 { 		   
 	static u16 flag,count0,count1,count2;
@@ -369,14 +274,7 @@ int Pick_Up(float Acceleration,float Angle,int encoder_left,int encoder_right)
 	 }		
 	return 0;
 }
-/**************************************************************************
-Function: Check whether the car is lowered
-Input   : The angle of balance£»Left encoder count£»Right encoder count
-Output  : 1£ºput down  0£ºNo action
-º¯Êı¹¦ÄÜ£º¼ì²âĞ¡³µÊÇ·ñ±»·ÅÏÂ
-Èë¿Ú²ÎÊı£ºÆ½ºâ½Ç¶È£»×ó±àÂëÆ÷¶ÁÊı£»ÓÒ±àÂëÆ÷¶ÁÊı
-·µ»Ø  Öµ£º1£ºĞ¡³µ·ÅÏÂ   0£ºĞ¡³µÎ´·ÅÏÂ
-**************************************************************************/
+// Function: Check whether the car is lowered - ¼ì²âĞ¡³µÊÇ·ñ±»·ÅÏÂ
 int Put_Down(float Angle,int encoder_left,int encoder_right)
 { 		   
 	 static u16 flag,count;	 
@@ -402,14 +300,7 @@ int Put_Down(float Angle,int encoder_left,int encoder_right)
 	 }
 	return 0;
 }
-/**************************************************************************
-Function: Encoder reading is converted to speed (mm/s)
-Input   : none
-Output  : none
-º¯Êı¹¦ÄÜ£º±àÂëÆ÷¶ÁÊı×ª»»ÎªËÙ¶È£¨mm/s£©
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/
+// Function: Encoder reading is converted to speed (mm/s) - ±àÂëÆ÷¶ÁÊı×ª»»ÎªËÙ¶È£¨mm/s£©
 void Get_Velocity_Form_Encoder(int encoder_left,int encoder_right)
 { 	
 	float Rotation_Speed_L,Rotation_Speed_R;						//µç»ú×ªËÙ  ×ªËÙ=±àÂëÆ÷¶ÁÊı£¨5msÃ¿´Î£©*¶ÁÈ¡ÆµÂÊ/±¶ÆµÊı/¼õËÙ±È/±àÂëÆ÷¾«¶È
@@ -422,14 +313,7 @@ void Get_Velocity_Form_Encoder(int encoder_left,int encoder_right)
 
 
 
-/**************************************************************************
-Function: Select_Zhongzhi
-Input   : none
-Output  : none
-º¯Êı¹¦ÄÜ£ºĞ¡³µ»úĞµÖĞÖµµÄÑ¡Ôñ
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/
+// Function: Select_Zhongzhi - Ğ¡³µ»úĞµÖĞÖµµÄÑ¡Ôñ
 void Select_Zhongzhi(void)                   //»úĞµÖĞÖµÑ¡Ôñ£¬±ÜÃâ°²×°Ñ²Ïß×°±¸Ê±Ğ¡³µÍùÇ°³åµÄÏÖÏó
 {
 	if(Mode == IRDM_Line_Patrol_Mode)
@@ -437,14 +321,7 @@ void Select_Zhongzhi(void)                   //»úĞµÖĞÖµÑ¡Ôñ£¬±ÜÃâ°²×°Ñ²Ïß×°±¸Ê±Ğ
 	else   Middle_angle = 1;
 }
 
-/**************************************************************************
-Function: IRDM_Mode
-Input   : none
-Output  : none
-º¯Êı¹¦ÄÜ£ººìÍâÑ­¼£Ä£Ê½ÔËĞĞ£¨ÔÚ10ms¿ØÖÆÖĞ¶ÏÖĞµ÷ÓÃ£©
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/
+// Function: IRDM_Mode - ºìÍâÑ­¼£Ä£Ê½ÔËĞĞ£¨ÔÚ10ms¿ØÖÆÖĞ¶ÏÖĞµ÷ÓÃ£©
 void IRDM_Mode(void)
 {
 	if(Mode == IRDM_Line_Patrol_Mode && Flag_Left != 1 && Flag_Right != 1)
@@ -454,16 +331,7 @@ void IRDM_Mode(void)
 	}
 }
 
-/**************************************************************************
-Function: IRDM_turn
-Input   : turn_diff£ºÂÖËÙ²î(mm/s)£»gyro£ºZÖáÍÓÂİÒÇ
-Output  : ×ªÏò¿ØÖÆPWM£¨ÓÒ×ªÎªÕı£¬×ó×ªÎª¸º£©
-º¯Êı¹¦ÄÜ£ººìÍâÑ­¼£Ä£Ê½×ªÏò¿ØÖÆ
-         ÓëÒ£¿Ø×ªÏò Turn() ¹²ÓÃ Turn_Amplitude/Turn_Kp/Turn_Kd£¬
-         °ÑÂÖËÙ²î(0~Turn90Angle)ÕÛËã³ÉÒ£¿Ø×ªÏò·ù¶È(0~Turn_Amplitude)
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
-**************************************************************************/
+// Function: IRDM_turn - ºìÍâÑ­¼£Ä£Ê½×ªÏò¿ØÖÆ
 int IRDM_turn(float turn_diff, float gyro)
 {
 	float Turn;

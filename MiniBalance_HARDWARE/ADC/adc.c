@@ -1,31 +1,7 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
+ 
 #include "adc.h"
 
-/**************************************************************************
-Function: Initialize the ADC
-Input   : none
-Output  : none
-函数功能：ACD初始化电池电压检测
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 		
+// Function: Initialize the ADC - ACD初始化电池电压检测	 		
 void Adc_Init(void)
 {    
  	ADC_InitTypeDef ADC_InitStructure; 
@@ -53,14 +29,7 @@ void Adc_Init(void)
 
 
 
-/**************************************************************************
-Function: AD sampling
-Input   : ch：Channel of ADC1
-Output  : AD conversion result
-函数功能：AD采样
-入口参数: ch：ADC2 的通道
-返回  值：AD转换结果
-**************************************************************************/	 		
+// Function: AD sampling - AD采样	 		
 u16 Get_Adc(u8 ch)   
 {
 	  	//设置指定ADC的规则组通道，一个序列，采样时间
@@ -70,14 +39,7 @@ u16 Get_Adc(u8 ch)
 	return ADC_GetConversionValue(ADC2);	//返回最近一次ADC1规则组的转换结果
 }
 
-/**************************************************************************
-Function: Read battery voltage
-Input   : none
-Output  : Battery voltage（MV）
-函数功能：读取电池电压 
-入口参数: 无
-返回  值：电池电压 单位MV
-**************************************************************************/
+// Function: Read battery voltage - 读取电池电压
 int Get_battery_volt(void)   
 {  
 	int Volt;//电池电压
@@ -86,14 +48,7 @@ int Get_battery_volt(void)
 }
 
 
-/**************************************************************************
-Function: Get_Voltage
-Input   : none
-Output  : none
-函数功能：获取ADC的值
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 
+// Function: Get_Voltage - 获取ADC的值	 
 //获取ADC的值
 u16 Get_Adc1(u8 ch)   
 {

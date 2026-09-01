@@ -60,9 +60,7 @@ static void run_self_test(void)
 
     result = mpu_run_self_test(gyro, accel);
     if (result == 0x7) {
-        /* Test passed. We can trust the gyro data here, so let's push it down
-         * to the DMP.
-         */
+                // Test passed. We can trust the gyro data here, so let's push it down
         float sens;
         unsigned short accel_sens;
         mpu_get_gyro_sens(&sens);
@@ -88,14 +86,7 @@ int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
 
 
-/**************************************************************************
-Function: The new ADC data is updated to FIFO array for filtering
-Input   : ax，ay，az：x，y, z-axis acceleration data；gx，gy，gz：x. Y, z-axis angular acceleration data
-Output  : none
-函数功能：将新的ADC数据更新到 FIFO数组，进行滤波处理
-入口参数：ax，ay，az：x，y，z轴加速度数据；gx，gy，gz：x，y，z轴角加速度数据
-返回  值：无
-**************************************************************************/
+// Function: The new ADC data is updated to FIFO array for filtering - 将新的ADC数据更...
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
 unsigned char i ;
@@ -152,49 +143,18 @@ for(i=0;i<10;i++){
 MPU6050_FIFO[5][10]=sum/10;
 }
 
-/**************************************************************************
-Function: Setting the clock source of mpu6050
-Input   : source：Clock source number
-Output  : none
-函数功能：设置  MPU6050 的时钟源
-入口参数：source：时钟源编号
-返回  值：无
- * CLK_SEL | Clock Source
- * --------+--------------------------------------
- * 0       | Internal oscillator
- * 1       | PLL with X Gyro reference
- * 2       | PLL with Y Gyro reference
- * 3       | PLL with Z Gyro reference
- * 4       | PLL with external 32.768kHz reference
- * 5       | PLL with external 19.2MHz reference
- * 6       | Reserved
- * 7       | Stops the clock and keeps the timing generator in reset
-**************************************************************************/
+// Function: Setting the clock source of mpu6050 - 设置  MPU6050 的时钟源
 void MPU6050_setClockSource(uint8_t source){
     IICwriteBits(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
 
 }
 
-/** Set full-scale gyroscope range.
- * @param range New full-scale gyroscope range value
- * @see getFullScaleRange()
- * @see MPU6050_GYRO_FS_250
- * @see MPU6050_RA_GYRO_CONFIG
- * @see MPU6050_GCONFIG_FS_SEL_BIT
- * @see MPU6050_GCONFIG_FS_SEL_LENGTH
- */
+// Set full-scale gyroscope range.
 void MPU6050_setFullScaleGyroRange(uint8_t range) {
     IICwriteBits(devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
 }
 
-/**************************************************************************
-Function: Setting the maximum range of mpu6050 accelerometer
-Input   : range：Acceleration maximum range number
-Output  : none
-函数功能：设置 MPU6050 加速度计的最大量程
-入口参数：range：加速度最大量程编号
-返回  值：无
-**************************************************************************/
+// Function: Setting the maximum range of mpu6050 accelerometer - 设置 MPU6050 加速度...
 //#define MPU6050_ACCEL_FS_2          0x00  		//===最大量程+-2G
 //#define MPU6050_ACCEL_FS_4          0x01			//===最大量程+-4G
 //#define MPU6050_ACCEL_FS_8          0x02			//===最大量程+-8G
@@ -203,78 +163,36 @@ void MPU6050_setFullScaleAccelRange(uint8_t range) {
     IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
 
-/**************************************************************************
-Function: Set mpu6050 to sleep mode or not
-Input   : enable：1，sleep；0，work；
-Output  : none
-函数功能：设置 MPU6050 是否进入睡眠模式
-入口参数：enable：1，睡觉；0，工作；
-返回  值：无
-**************************************************************************/
+// Function: Set mpu6050 to sleep mode or not - 设置 MPU6050 是否进入睡眠模式
 void MPU6050_setSleepEnabled(uint8_t enabled) {
     IICwriteBit(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
 }
 
-/**************************************************************************
-Function: Read identity
-Input   : none
-Output  : 0x68
-函数功能：读取  MPU6050 WHO_AM_I 标识
-入口参数：无
-返回  值：0x68
-**************************************************************************/
+// Function: Read identity - 读取  MPU6050 WHO_AM_I 标识
 uint8_t MPU6050_getDeviceID(void) {
 
     IICreadBytes(devAddr, MPU6050_RA_WHO_AM_I, 1, buffer);
     return buffer[0];
 }
 
-/**************************************************************************
-Function: Check whether mpu6050 is connected
-Input   : none
-Output  : 1：Connected；0：Not connected
-函数功能：检测MPU6050 是否已经连接
-入口参数：无
-返回  值：1：已连接；0：未连接
-**************************************************************************/
+// Function: Check whether mpu6050 is connected - 检测MPU6050 是否已经连接
 uint8_t MPU6050_testConnection(void) {
    if(MPU6050_getDeviceID() == 0x68)  //0b01101000;
    return 1;
    	else return 0;
 }
 
-/**************************************************************************
-Function: Setting whether mpu6050 is the host of aux I2C cable
-Input   : enable：1，yes；0;not
-Output  : none
-函数功能：设置 MPU6050 是否为AUX I2C线的主机
-入口参数：enable：1，是；0：否
-返回  值：无
-**************************************************************************/
+// Function: Setting whether mpu6050 is the host of aux I2C cable - 设置 MPU6050 是...
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
     IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
 
-/**************************************************************************
-Function: Setting whether mpu6050 is the host of aux I2C cable
-Input   : enable：1，yes；0;not
-Output  : none
-函数功能：设置 MPU6050 是否为AUX I2C线的主机
-入口参数：enable：1，是；0：否
-返回  值：无
-**************************************************************************/
+// Function: Setting whether mpu6050 is the host of aux I2C cable - 设置 MPU6050 是...
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
     IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
 
-/**************************************************************************
-Function: initialization Mpu6050 to enter the available state
-Input   : none
-Output  : none
-函数功能：初始化	MPU6050 以进入可用状态
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: initialization Mpu6050 to enter the available state - 初始化	MPU6050 以...
 void MPU6050_initialize(void) {
     MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //设置时钟
     MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//陀螺仪量程设置
@@ -284,14 +202,7 @@ void MPU6050_initialize(void) {
 	  MPU6050_setI2CBypassEnabled(0);	 //主控制器的I2C与	MPU6050的AUXI2C	直通关闭
 }
 
-/**************************************************************************
-Function: Initialization of DMP in mpu6050
-Input   : none
-Output  : none
-函数功能：MPU6050内置DMP的初始化
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Initialization of DMP in mpu6050 - MPU6050内置DMP的初始化
 void DMP_Init(void)
 { 
    u8 temp[1]={0};
@@ -327,14 +238,7 @@ void DMP_Init(void)
 	Flag_Show=0;
 
 }
-/**************************************************************************
-Function: Read the attitude information of DMP in mpu6050
-Input   : none
-Output  : none
-函数功能：读取MPU6050内置DMP的姿态信息
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Read the attitude information of DMP in mpu6050 - 读取MPU6050内置DMP的姿态信息
 void Read_DMP(void)
 {	
 	  unsigned long sensor_timestamp;
@@ -353,14 +257,7 @@ void Read_DMP(void)
 				}
 
 }
-/**************************************************************************
-Function: Read mpu6050 built-in temperature sensor data
-Input   : none
-Output  : Centigrade temperature
-函数功能：读取MPU6050内置温度传感器数据
-入口参数：无
-返回  值：摄氏温度
-**************************************************************************/
+// Function: Read mpu6050 built-in temperature sensor data - 读取MPU6050内置温度传感器数据
 int Read_Temperature(void)
 {	   
 	  float Temp;

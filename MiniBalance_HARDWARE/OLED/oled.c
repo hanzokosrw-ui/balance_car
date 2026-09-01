@@ -1,34 +1,9 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "oled.h"
 #include "stdlib.h"
 #include "./OLED/oledfont.h"  	 
 		   
 u8 OLED_GRAM[128][8];	 
-/**************************************************************************
-Function: Refresh the OLED screen
-Input   : none
-Output  : none
-函数功能：刷新OLED屏幕
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Refresh the OLED screen - 刷新OLED屏幕
 void OLED_Refresh_Gram(void)
 {
 	u8 i,n;		    
@@ -41,14 +16,7 @@ void OLED_Refresh_Gram(void)
 	}   
 }
 
-/**************************************************************************
-Function: Refresh the OLED screen
-Input   : Dat: data/command to write, CMD: data/command flag 0, represents the command;1, represents data
-Output  : none
-函数功能：向OLED写入一个字节
-入口参数：dat:要写入的数据/命令，cmd:数据/命令标志 0,表示命令;1,表示数据
-返回  值：无
-**************************************************************************/  
+// Function: Refresh the OLED screen - 向OLED写入一个字节  
 void OLED_WR_Byte(u8 dat,u8 cmd)
 {	
 	u8 i;			  
@@ -70,56 +38,28 @@ void OLED_WR_Byte(u8 dat,u8 cmd)
 } 
 
 	  	  
-/**************************************************************************
-Function: Turn on the OLED display
-Input   : none
-Output  : none
-函数功能：开启OLED显示 
-入口参数：无
-返回  值：无
-**************************************************************************/  
+// Function: Turn on the OLED display - 开启OLED显示  
 void OLED_Display_On(void)
 {
 	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
 	OLED_WR_Byte(0X14,OLED_CMD);  //DCDC ON
 	OLED_WR_Byte(0XAF,OLED_CMD);  //DISPLAY ON
 }
-/**************************************************************************
-Function: Turn off the OLED display
-Input   : none
-Output  : none
-函数功能：关闭OLED显示 
-入口参数：无			  
-返回  值：无
-**************************************************************************/     
+// Function: Turn off the OLED display - 关闭OLED显示     
 void OLED_Display_Off(void)
 {
 	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
 	OLED_WR_Byte(0X10,OLED_CMD);  //DCDC OFF
 	OLED_WR_Byte(0XAE,OLED_CMD);  //DISPLAY OFF
 }		   			 
-/**************************************************************************
-Function: Screen clear function, clear the screen, the entire screen is black, and did not light up the same
-Input   : none
-Output  : none
-函数功能：清屏函数,清完屏,整个屏幕是黑色的，和没点亮一样
-入口参数：无		  
-返回  值：无
-**************************************************************************/  	  
+// Function: Screen clear function, clear the screen, the entire screen is black...  	  
 void OLED_Clear(void)  
 {  
 	u8 i,n;  
 	for(i=0;i<8;i++)for(n=0;n<128;n++)OLED_GRAM[n][i]=0X00;  
 	OLED_Refresh_Gram();//更新显示
 }
-/**************************************************************************
-Function: Draw point
-Input   : x,y: starting coordinate;T :1, fill,0, empty
-Output  : none
-函数功能：画点 
-入口参数：x,y :起点坐标; t:1,填充,0,清空			  
-返回  值：无
-**************************************************************************/ 			   
+// Function: Draw point - 画点 			   
 void OLED_DrawPoint(u8 x,u8 y,u8 t)
 {
 	u8 pos,bx,temp=0;
@@ -131,14 +71,7 @@ void OLED_DrawPoint(u8 x,u8 y,u8 t)
 	else OLED_GRAM[x][pos]&=~temp;	    
 }
 
-/**************************************************************************
-Function: Displays a character, including partial characters, at the specified position
-Input   : x,y: starting coordinate;Len: The number of digits;Size: font size;Mode :0, anti-white display,1, normal display
-Output  : none
-函数功能：在指定位置显示一个字符,包括部分字符
-入口参数：x,y :起点坐标; len :数字的位数; size:字体大小; mode:0,反白显示,1,正常显示	   
-返回  值：无
-**************************************************************************/
+// Function: Displays a character, including partial characters, at the specifie...
 void OLED_ShowChar(u8 x,u8 y,u8 chr,u8 size,u8 mode)
 {      			    
 	u8 temp,t,t1;
@@ -163,28 +96,14 @@ void OLED_ShowChar(u8 x,u8 y,u8 chr,u8 size,u8 mode)
 			}  	 
     }          
 }
-/**************************************************************************
-Function: Find m to the NTH power
-Input   : m: base number, n: power number
-Output  : none
-函数功能：求m的n次方的函数
-入口参数：m：底数，n：次方数
-返回  值：无
-**************************************************************************/
+// Function: Find m to the NTH power - 求m的n次方的函数
 u32 oled_pow(u8 m,u8 n)
 {
 	u32 result=1;	 
 	while(n--)result*=m;    
 	return result;
 }				  
-/**************************************************************************
-Function: Displays 2 numbers
-Input   : x,y: starting coordinate;Len: The number of digits;Size: font size;Mode: mode, 0, fill mode, 1, overlay mode;Num: value (0 ~ 4294967295);
-Output  : none
-函数功能：显示2个数字
-入口参数：x,y :起点坐标; len :数字的位数; size:字体大小; mode:模式, 0,填充模式, 1,叠加模式; num:数值(0~4294967295);	 
-返回  值：无
-**************************************************************************/		  
+// Function: Displays 2 numbers - 显示2个数字		  
 void OLED_ShowNumber(u8 x,u8 y,u32 num,u8 len,u8 size)
 {         	
 	u8 t,temp;
@@ -204,14 +123,7 @@ void OLED_ShowNumber(u8 x,u8 y,u32 num,u8 len,u8 size)
 	 	OLED_ShowChar(x+(size/2)*t,y,temp+'0',size,1); 
 	}
 } 
-/**************************************************************************
-Function: Display string
-Input   : x,y: starting coordinate;*p: starting address of the string
-Output  : none
-函数功能：显示字符串
-入口参数：x,y :起点坐标; *p:字符串起始地址 
-返回  值：无
-**************************************************************************/
+// Function: Display string - 显示字符串
 //用16字体
 void OLED_ShowString(u8 x,u8 y,const u8 *p)
 {
@@ -226,65 +138,58 @@ void OLED_ShowString(u8 x,u8 y,const u8 *p)
         p++;
     }  
 }	   
-/**************************************************************************
-Function: Initialize the OLED
-Input   : none
-Output  : none
-函数功能：初始化OLED	
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 				    
+// Function: Initialize the OLED - 初始化OLED	 				    
 void OLED_Init(void)
 { 	
-	/*定义一个GPIO_InitTypeDef类型的结构体*/
+		// 定义一个GPIO_InitTypeDef类型的结构体
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/*关闭JTAG接口*/
+		// 关闭JTAG接口
 	JTAG_Set(JTAG_SWD_DISABLE);    
 
-	/*打开SWD接口 可以利用主板的SWD接口调试*/
+		// 打开SWD接口 可以利用主板的SWD接口调试
 	JTAG_Set(SWD_ENABLE);           
 
-	/*开启时钟*/
+		// 开启时钟
 	RCC_APB2PeriphClockCmd( OLED_SCLK_GPIO_CLK|OLED_SDIN_GPIO_CLK, ENABLE); 
 	RCC_APB2PeriphClockCmd( OLED_RST_GPIO_CLK|OLED_RS_GPIO_CLK, ENABLE); 
 
-	/*选择要控制OLED的GPIO*/															   
+		// 选择要控制OLED的GPIO															   
 	GPIO_InitStructure.GPIO_Pin = OLED_SCLK_GPIO_PIN;	
-	/*设置GPIO模式为通用推挽输出*/
+		// 设置GPIO模式为通用推挽输出
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	/*设置GPIO速率为50MHz */   
+		// 设置GPIO速率为50MHz   
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	/*调用库函数，初始化控制OLED的GPIO*/
+		// 调用库函数，初始化控制OLED的GPIO
 	GPIO_Init(OLED_SCLK_GPIO_PORT, &GPIO_InitStructure);			 
 
 
-	/*选择要控制OLED的GPIO*/															   
+		// 选择要控制OLED的GPIO															   
 	GPIO_InitStructure.GPIO_Pin = OLED_SDIN_GPIO_PIN;	
-	/*设置GPIO模式为通用推挽输出*/
+		// 设置GPIO模式为通用推挽输出
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	/*设置GPIO速率为50MHz */   
+		// 设置GPIO速率为50MHz   
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	/*调用库函数，初始化控制OLED的GPIO*/
+		// 调用库函数，初始化控制OLED的GPIO
 	GPIO_Init(OLED_SDIN_GPIO_PORT, &GPIO_InitStructure);			 
 
 
-	/*选择要控制OLED的GPIO*/															   
+		// 选择要控制OLED的GPIO															   
 	GPIO_InitStructure.GPIO_Pin = OLED_RST_GPIO_PIN;	
-	/*设置GPIO模式为通用推挽输出*/
+		// 设置GPIO模式为通用推挽输出
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	/*设置GPIO速率为50MHz */   
+		// 设置GPIO速率为50MHz   
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	/*调用库函数，初始化控制OLED的GPIO*/
+		// 调用库函数，初始化控制OLED的GPIO
 	GPIO_Init(OLED_RST_GPIO_PORT, &GPIO_InitStructure);			 
 
-	/*选择要控制OLED的GPIO*/															   
+		// 选择要控制OLED的GPIO															   
 	GPIO_InitStructure.GPIO_Pin = OLED_RS_GPIO_PIN;	
-	/*设置GPIO模式为通用推挽输出*/
+		// 设置GPIO模式为通用推挽输出
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	/*设置GPIO速率为50MHz */   
+		// 设置GPIO速率为50MHz   
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	/*调用库函数，初始化控制OLED的GPIO*/
+		// 调用库函数，初始化控制OLED的GPIO
 	GPIO_Init(OLED_RS_GPIO_PORT, &GPIO_InitStructure);			 
 
 	OLED_RST_Clr();
@@ -323,14 +228,7 @@ void OLED_Init(void)
 	OLED_Clear();
 }  
 
-/**************************************************************************
-Function: OLED_Refresh_GRAM_Line
-Input   : line:0--7
-Output  : none
-函数功能：line:显示屏行数
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 				    
+// Function: OLED_Refresh_GRAM_Line - line:显示屏行数	 				    
 //oled只改变某行储存数据的信息，不立刻刷新
 void OLED_Refresh_GRAM_Line(u8 line)//line只能为0--7
 {

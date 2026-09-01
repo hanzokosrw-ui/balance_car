@@ -6,7 +6,7 @@ u8 Ros_count=0,Ros_send_flag;                    //ROSÄ£Ê½ÏÂÈÃROSÄ£Ê½¿ØÖÆµÄ¸üÁ÷³
 u8 Pick_up_stop=0;                          //¼ì²éÊÇ·ñ±»ÄÃÆğ±êÖ¾Î»
 int Middle_angle=0;                         //»úĞµÖĞÖµÄ¬ÈÏÎª0
 u8 Way_Angle=1;                             //»ñÈ¡½Ç¶ÈµÄËã·¨£¬1£ºËÄÔªÊı  2£º¿¨¶ûÂü  3£º»¥²¹ÂË²¨ 
-u16 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity=2,Target_Velocity=300; //À¶ÑÀÒ£¿ØÏà¹ØµÄ±äÁ¿
+u16 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity=2,Target_Velocity=300; //À¶ÑÀÒ£¿Ø
 float RC_Velocity,RC_Turn_Velocity;			    //Ò£¿Ø¿ØÖÆµÄËÙ¶È
 u8 Flag_Stop=1,Flag_Show=0;                 //µç»úÍ£Ö¹±êÖ¾Î»ºÍÏÔÊ¾±êÖ¾Î»  Ä¬ÈÏÍ£Ö¹ ÏÔÊ¾´ò¿ª
 u8 Mode = IRDM_Line_Patrol_Mode;                    //Ä£Ê½Ñ¡Ôñ£¬Ä¬ÈÏºìÍâÑ²ÏßÄ£Ê½
@@ -14,7 +14,7 @@ float Move_X,Move_Z;                        //¿ØÖÆĞ¡³µ±ÜÕÏ¡¢¸úËæÊ±Ç°½øµÄ±äÁ¿£¬×ª
 int Encoder_Left,Encoder_Right;             //×óÓÒ±àÂëÆ÷µÄÂö³å¼ÆÊı
 int Motor_Left,Motor_Right;                 //µç»úPWM±äÁ¿ Ó¦ÊÇMotorµÄ ÏòMotoÖÂ¾´	
 int Temperature;                            //ÎÂ¶È±äÁ¿
-int Voltage;                                //µç³ØµçÑ¹²ÉÑùÏà¹ØµÄ±äÁ¿
+int Voltage;                                //µç³ØµçÑ¹
 float Angle_Balance,Gyro_Balance,Gyro_Turn; //Æ½ºâÇã½Ç Æ½ºâÍÓÂİÒÇ ×ªÏòÍÓÂİÒÇ
 u32 Distance;                               //À×´ï²â¾à
 u8 delay_50,PID_Send; 						//ÑÓÊ±ºÍµ÷²ÎÏà¹Ø±äÁ¿

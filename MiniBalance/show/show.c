@@ -1,32 +1,8 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
 
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "show.h"
 #include "TrackModule.h"
 float Velocity_Left,Velocity_Right;	//车轮速度(mm/s)
-/**************************************************************************
-Function: OLED display
-Input   : none
-Output  : none
-函数功能：OLED显示
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: OLED display - OLED显示
 void oled_show(void)
 {
 	u8 truth_value;
@@ -80,14 +56,7 @@ void oled_show(void)
 		//=============刷新=======================//
 		OLED_Refresh_Gram();	
 }
-/**************************************************************************
-Function: Send data to APP
-Input   : none
-Output  : none
-函数功能：向APP发送数据
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Send data to APP - 向APP发送数据
 void APP_Show(void)
 {    
   static u8 flag;

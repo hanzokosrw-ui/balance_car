@@ -1,32 +1,10 @@
-/***********************************************
-公司：轮趣科技（东莞）有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2023-03-02
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2023-03-02
-
-All rights reserved
-***********************************************/
 
 #ifndef __CAPTURE_H
 #define	__CAPTURE_H
 
 
 
-/*-------------超声波测距程序使用-----------
-超声波初始化之后，在control.c的中断服务函数里面可以直接通过Read_Distane函数读取
-放在下列的变量里面
-Distance_1,Distance_2,Distance_3,Distance_4;//超声波相关变量 
------------超声波测距程序使用-----------*/
+// -------------超声波测距程序使用-----------
 
 
 #include "stm32f10x.h"

@@ -1,31 +1,6 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 
 #include "filter.h"
-/**************************************************************************
-Function: Simple Kalman filter
-Input   : acceleration、angular velocity
-Output  : none
-函数功能：获取x轴角度简易卡尔曼滤波
-入口参数：加速度获取的角度、角速度
-返回  值：x轴角速度
-**************************************************************************/
+// Function: Simple Kalman filter - 获取x轴角度简易卡尔曼滤波
 float dt=0.005;		  //每5ms进行一次滤波                 
 float Kalman_Filter_x(float Accel,float Gyro)		
 {
@@ -74,14 +49,7 @@ float Kalman_Filter_x(float Accel,float Gyro)
 	angle_dot  = Gyro - Q_bias;	 //输出值(后验估计)的微分=角速度
 	return angle;
 }
-/**************************************************************************
-Function: First order complementary filtering
-Input   : acceleration、angular velocity
-Output  : none
-函数功能：一阶互补滤波
-入口参数：加速度获取的角度、角速度
-返回  值：x轴角速度
-**************************************************************************/
+// Function: First order complementary filtering - 一阶互补滤波
 float Complementary_Filter_x(float angle_m, float gyro_m)
 {
 	 static float angle;
@@ -89,14 +57,7 @@ float Complementary_Filter_x(float angle_m, float gyro_m)
    angle = K1 * angle_m+ (1-K1) * (angle + gyro_m * dt);
 	 return angle;
 }
-/**************************************************************************
-Function: Simple Kalman filter
-Input   : acceleration、angular velocity
-Output  : none
-函数功能：获取y轴角度简易卡尔曼滤波
-入口参数：加速度获取的角度、角速度
-返回  值：y轴角速度
-**************************************************************************/
+// Function: Simple Kalman filter - 获取y轴角度简易卡尔曼滤波
 float Kalman_Filter_y(float Accel,float Gyro)		
 {
 	static float angle_dot;
@@ -142,14 +103,7 @@ float Kalman_Filter_y(float Accel,float Gyro)
 	angle_dot   = Gyro - Q_bias;	//输出值(后验估计)的微分=角速度
 	return angle;
 }
-/**************************************************************************
-Function: First order complementary filtering
-Input   : acceleration、angular velocity
-Output  : none
-函数功能：一阶互补滤波
-入口参数：加速度获取的角度、角速度
-返回  值：y轴角速度
-**************************************************************************/
+// Function: First order complementary filtering - 一阶互补滤波
 float Complementary_Filter_y(float angle_m, float gyro_m)
 {
 	 static float angle;

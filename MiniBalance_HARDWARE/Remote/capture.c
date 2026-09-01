@@ -1,21 +1,3 @@
-/***********************************************
-公司：轮趣科技（东莞）有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2023-03-02
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2023-03-02
-
-All rights reserved
-***********************************************/
 
 //这个模块默认不使用
 //4路超声波模块
@@ -31,14 +13,7 @@ u16 TIM2CH2_CAPTURE_STA,TIM2CH2_CAPTURE_VAL;
 
 
 // 超声波回波捕获中断（TIM2_CH2）
-/**************************************************************************
-Function: TIM2_IRQHandler
-Input   : none
-Output  : none
-函数功能：高电平捕获中断函数
-入口参数: 无
-返回  值：无
-**************************************************************************/	 	
+// Function: TIM2_IRQHandler - 高电平捕获中断函数	 	
 void TIM2_IRQHandler(void)
 {
 	u16 tsr;
@@ -81,14 +56,7 @@ void TIM2_IRQHandler(void)
 
 
 #ifdef Distance_Capture
-/**************************************************************************
-Function: Timer 2 channel 2 input capture initialization
-Input   : arr：Auto reload value； psc： Clock prescaled frequency
-Output  : none
-函数功能：定时器2通道2输入捕获初始化
-入口参数: arr：自动重装值； psc：时钟预分频数 
-返回  值：无
-**************************************************************************/	 		
+// Function: Timer 2 channel 2 input capture initialization - 定时器2通道2输入捕获初始化	 		
 TIM_ICInitTypeDef  TIM2_ICInitStructure;
 void Distance_Cap_Init(u16 arr,u16 psc)	
 {	 
@@ -133,14 +101,7 @@ void Distance_Cap_Init(u16 arr,u16 psc)
 	TIM_ITConfig(TIM2,TIM_IT_Update|TIM_IT_CC2,ENABLE);//允许更新中断 ,允许CC2IE捕获中断	
     TIM_Cmd(TIM2,ENABLE ); 	//使能定时器2
 }
-/**************************************************************************
-Function: Ultrasonic receiving echo function
-Input   : none
-Output  : none
-函数功能：超声波接收回波函数
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 	
+// Function: Ultrasonic receiving echo function - 超声波接收回波函数	 	
 void Read_Distane(void)        
 {   
 	 PCout(15)=1;         

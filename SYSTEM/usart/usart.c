@@ -1,21 +1,3 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "sys.h"
 #include "usart.h"	 
 SEND_DATA Send_Data;
@@ -58,14 +40,7 @@ int fputc(int ch, FILE *f)
 }
 #endif 
 
-/**************************************************************************
-Function: Serial port 1 initialization
-Input   : bound：Baud rate
-Output  : none
-函数功能：串口1初始化
-入口参数：bound：波特率
-返回  值：无
-**************************************************************************/
+// Function: Serial port 1 initialization - 串口1初始化
 void uart_init(u32 bound)
 {
   //GPIO端口设置
@@ -107,14 +82,7 @@ void uart_init(u32 bound)
   USART_Cmd(USART1, ENABLE);                    //使能串口1 
 }
 
-/**************************************************
-Function:Serial port 1 receivees interrupted
-Input:None
-Output:None
-函数：串口一中断
-入口参数：无
-放回值：无
-**************************************************/
+// Function: Serial port 1 receivees interrupted - 串口一中断
 void USART1_IRQHandler(void)
 {
 	static u8 Count=0;
@@ -154,14 +122,7 @@ void USART1_IRQHandler(void)
 	}
 }
 
-/**************************************************************************
-Function: The data sent by the serial port is assigned
-Input   : none
-Output  : none
-函数功能：串口发送的数据进行赋值
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: The data sent by the serial port is assigned - 串口发送的数据进行赋值
 void data_transition(void)
 {
 	Send_Data.Sensor_Str.Frame_Header = FRAME_HEADER; //Frame_header //帧头
@@ -240,14 +201,7 @@ void data_transition(void)
 }
 
 
-/**************************************************************************
-Function: After the top 8 and low 8 figures are integrated into a short type data, the unit reduction is converted
-Input   : 8 bits high, 8 bits low
-Output  : The target velocity of the robot on the X/Y/Z axis
-函数功能：将上位机发过来的高8位和低8位数据整合成一个short型数据后，再做单位还原换算
-入口参数：高8位，低8位
-返回  值：机器人X/Y/Z轴的目标速度
-**************************************************************************/
+// Function: After the top 8 and low 8 figures are integrated into a short type ...
 float XYZ_Target_Speed_transition(u8 High,u8 Low)
 {
 	//Data conversion intermediate variable
@@ -260,28 +214,14 @@ float XYZ_Target_Speed_transition(u8 High,u8 Low)
 	return transition; 
 								
 }
-/**************************************************************************
-Function: Serial port 1 sends data
-Input   : The data to send
-Output  : none
-函数功能：串口1发送数据
-入口参数：要发送的数据
-返回  值：无
-**************************************************************************/
+// Function: Serial port 1 sends data - 串口1发送数据
 void usart1_send(u8 data)
 {
 	USART1->DR = data;
 	while((USART1->SR&0x40)==0);	
 }
 
-/**************************************************************************
-Function: Serial port 1 sends data
-Input   : none
-Output  : none
-函数功能：串口1发送数据
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Serial port 1 sends data - 串口1发送数据
 void USART1_SEND(void)
 {
   unsigned char i = 0;	
@@ -292,14 +232,7 @@ void USART1_SEND(void)
 	}	 
 }
 
-/**************************************************************************
-Function: Calculates the check bits of data to be sent/received
-Input   : Count_Number: The first few digits of a check; Mode: 0-Verify the received data, 1-Validate the sent data
-Output  : Check result
-函数功能：计算要发送/接收的数据校验结果
-入口参数：Count_Number：校验的前几位数；Mode：0-对接收数据进行校验，1-对发送数据进行校验
-返回  值：校验结果
-**************************************************************************/
+// Function: Calculates the check bits of data to be sent/received - 计算要发送/接收的数据...
 u8 Check_Sum(unsigned char Count_Number,unsigned char mode)
 {
 	unsigned char check_sum=0,k;

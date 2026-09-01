@@ -1,21 +1,3 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "delay.h"
 ////////////////////////////////////////////////////////////////////////////////// 	 
 //如果需要使用OS,则包括下面的头文件即可.
@@ -51,14 +33,7 @@ static u16 fac_ms=0;							//ms延时倍乘数,在ucos下,代表每个节拍的ms数
 #define delay_ostickspersec	OSCfg_TickRate_Hz	//OS时钟节拍,即每秒调度次数
 #define delay_osintnesting 	OSIntNestingCtr		//中断嵌套级别,即中断嵌套次数
 #endif
-/**************************************************************************
-Function: Turn off task scheduling when us level delay occurs (to prevent interruption of us level delay)
-Input   : none
-Output  : none
-函数功能：us级延时时,关闭任务调度(防止打断us级延迟)
-入口参数：无	
-返回  值：无
-**************************************************************************/
+// Function: Turn off task scheduling when us level delay occurs (to prevent int...
 void delay_osschedlock(void)
 {
 #ifdef CPU_CFG_CRITICAL_METHOD   		//使用UCOSIII
@@ -69,14 +44,7 @@ void delay_osschedlock(void)
 #endif
 }
 
-/**************************************************************************
-Function: Us level delay, resume task scheduling
-Input   : none
-Output  : none
-函数功能：us级延时,恢复任务调度
-入口参数：无	
-返回  值：无
-**************************************************************************/
+// Function: Us level delay, resume task scheduling - us级延时,恢复任务调度
 void delay_osschedunlock(void)
 {	
 #ifdef CPU_CFG_CRITICAL_METHOD   	//使用UCOSIII
@@ -87,14 +55,7 @@ void delay_osschedunlock(void)
 #endif
 }
 
-/**************************************************************************
-Function: Call the delay function of OS to delay
-Input   : ticks：Beat number of delay
-Output  : none
-函数功能：调用OS自带的延时函数延时
-入口参数：ticks:延时的节拍数	
-返回  值：无
-**************************************************************************/
+// Function: Call the delay function of OS to delay - 调用OS自带的延时函数延时
 void delay_ostimedly(u32 ticks)
 {
 #ifdef CPU_CFG_CRITICAL_METHOD
@@ -105,14 +66,7 @@ void delay_ostimedly(u32 ticks)
 #endif 
 }
  
-/**************************************************************************
-Function: SYSTICK interrupts the service function for use with ucos
-Input   : none
-Output  : none
-函数功能：systick中断服务函数,使用ucos时用到
-入口参数：无	
-返回  值：无
-**************************************************************************/
+// Function: SYSTICK interrupts the service function for use with ucos - systick...
 void SysTick_Handler(void)
 {	
 	if(delay_osrunning==1)						//OS开始跑了,才执行正常的调度处理
@@ -125,14 +79,7 @@ void SysTick_Handler(void)
 #endif
 
 			   
-/**************************************************************************
-Function: Initialize the delay function
-Input   : SYSCLK：System clock
-Output  : none
-函数功能：初始化延迟函数
-入口参数：SYSCLK:系统时钟	
-返回  值：无
-**************************************************************************/
+// Function: Initialize the delay function - 初始化延迟函数
 //当使用ucos的时候,此函数会初始化ucos的时钟节拍
 //SYSTICK的时钟固定为HCLK时钟的1/8
 void delay_init()
@@ -158,14 +105,7 @@ void delay_init()
 }								    
 
 #if SYSTEM_SUPPORT_OS  							//如果需要支持OS.
-/**************************************************************************
-Function: Delay function（us）
-Input   : nus：The number of us to delay
-Output  : none
-函数功能：延时函数（us）
-入口参数：nus：要延时的us数	
-返回  值：无
-**************************************************************************/	    								   
+// Function: Delay function（us） - 延时函数（us）	    								   
 void delay_us(u32 nus)
 {		
 	u32 ticks;
@@ -188,14 +128,7 @@ void delay_us(u32 nus)
 	};
 	delay_osschedunlock();						//恢复OS调度									    
 }
-/**************************************************************************
-Function: Delay function（ms）
-Input   : mus：The number of ms to delay
-Output  : none
-函数功能：延时函数（us）
-入口参数：mus：要延时的ms数	
-返回  值：无
-**************************************************************************/
+// Function: Delay function（ms） - 延时函数（us）
 void delay_ms(u16 nms)
 {	
 	if(delay_osrunning&&delay_osintnesting==0)	//如果OS已经在跑了,并且不是在中断里面(中断里面不能任务调度)	    
@@ -210,14 +143,7 @@ void delay_ms(u16 nms)
 }
 #else 
 //不用ucos时
-/**************************************************************************
-Function: Delay function（us）
-Input   : nus：The number of us to delay
-Output  : none
-函数功能：延时函数（us）
-入口参数：nus：要延时的us数	
-返回  值：无
-**************************************************************************/			    								   
+// Function: Delay function（us） - 延时函数（us）			    								   
 void delay_us(u32 nus)
 {		
 	u32 temp;	    	 
@@ -231,14 +157,7 @@ void delay_us(u32 nus)
 	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;	//关闭计数器
 	SysTick->VAL =0X00;      					 				//清空计数器	 
 }
-/**************************************************************************
-Function: Delay function（ms）
-Input   : mus：The number of ms to delay
-Output  : none
-函数功能：延时函数（us）
-入口参数：mus：要延时的ms数	
-返回  值：无
-**************************************************************************/
+// Function: Delay function（ms） - 延时函数（us）
 //注意nms的范围
 //SysTick->LOAD为24位寄存器,所以,最大延时为:
 //nms<=0xffffff*8*1000/SYSCLK

@@ -1,21 +1,3 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #ifndef __USART_H
 #define __USART_H
 #include "stdio.h"	
@@ -26,8 +8,8 @@ All rights reserved
 #define SEND_DATA_SIZE    24
 #define RECEIVE_DATA_SIZE 11
 
-/*****A structure for storing triaxial data of a gyroscope accelerometer*****/
-/*****用于存放陀螺仪加速度计三轴数据的结构体*********************************/
+// A structure for storing triaxial data of a gyroscope accelerometer
+// 用于存放陀螺仪加速度计三轴数据的结构体
 typedef struct __Mpu6050_Data_ 
 {
 	short X_data; //2 bytes //2个字节
@@ -35,8 +17,8 @@ typedef struct __Mpu6050_Data_
 	short Z_data; //2 bytes //2个字节
 }Mpu6050_Data;
 
-/*******The structure of the serial port sending data************/
-/*******串口发送数据的结构体*************************************/
+// The structure of the serial port sending data
+// 串口发送数据的结构体
 typedef struct _SEND_DATA_  
 {
 	unsigned char buffer[SEND_DATA_SIZE];

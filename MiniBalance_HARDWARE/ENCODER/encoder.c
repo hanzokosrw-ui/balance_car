@@ -1,34 +1,9 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "encoder.h"
 #include "stm32f10x_gpio.h"
 
 
 
-/************************************************************
-Function: Initialize TIM2 to encoder interface mode
-Input   : none
-Output  : none
-函数功能：把TIM8初始化为编码器接口模式
-入口参数：无
-返回  值：无
-**************************************************************************/ 
+// Function: Initialize TIM2 to encoder interface mode - 把TIM8初始化为编码器接口模式 
 void Encoder_Init_TIM8(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;  
@@ -66,14 +41,7 @@ void Encoder_Init_TIM8(void)
 //	NVIC_Init(&NVIC_InitStruct);
 	
 }
-/**************************************************************************
-Function: Initialize TIM4 to encoder interface mode
-Input   : none
-Output  : none
-函数功能：把TIM4初始化为编码器接口模式
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Initialize TIM4 to encoder interface mode - 把TIM4初始化为编码器接口模式
 void Encoder_Init_TIM4(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure; 
@@ -112,14 +80,7 @@ void Encoder_Init_TIM4(void)
 //	NVIC_Init(&NVIC_InitStruct);
 
 }
-/**************************************************************************
-Function: Read encoder count per unit time
-Input   : TIMX：Timer
-Output  : none
-函数功能：单位时间读取编码器计数
-入口参数：TIMX：定时器
-返回  值：速度值
-**************************************************************************/
+// Function: Read encoder count per unit time - 单位时间读取编码器计数
 int Read_Encoder(u8 TIMX)
 {
    int Encoder_TIM;    
@@ -132,14 +93,7 @@ int Read_Encoder(u8 TIMX)
 	 }
 		return Encoder_TIM;
 }
-/**************************************************************************
-Function: TIM4 interrupt service function
-Input   : none
-Output  : none
-函数功能：TIM4中断服务函数
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: TIM4 interrupt service function - TIM4中断服务函数
 void TIM4_IRQHandler(void)
 { 		    		  			    
 	if(TIM_GetFlagStatus(TIM4,TIM_FLAG_Update)==SET)//溢出中断
@@ -148,14 +102,7 @@ void TIM4_IRQHandler(void)
 	} 
 	TIM_ClearITPendingBit(TIM4,TIM_IT_Update); 	//清除中断标志位 	    
 }
-/**************************************************************************
-Function: TIM2 interrupt service function
-Input   : none
-Output  : none
-函数功能：TIM8中断服务函数
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: TIM2 interrupt service function - TIM8中断服务函数
 void TIM8_UP_IRQHandler(void)
 { 		    		  			    
 	if(TIM_GetFlagStatus(TIM8,TIM_FLAG_Update)==SET)//溢出中断

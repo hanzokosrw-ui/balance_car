@@ -1,22 +1,3 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
-
 #ifndef __OLED_H
 #define __OLED_H			  	 
 //#include "Header.h"
@@ -24,22 +5,22 @@ All rights reserved
 
 
 
-/* 定义OLED连接的GPIO端口, 用户只需要修改下面的代码即可改变控制的OLED引脚 */
-#define OLED_SCLK_GPIO_PORT    	GPIOC			              /* GPIO端口 */
-#define OLED_SCLK_GPIO_CLK 	    RCC_APB2Periph_GPIOC		/* GPIO端口时钟 */
-#define OLED_SCLK_GPIO_PIN		GPIO_Pin_14			        /* 相应引脚号 */
+// 定义OLED连接的GPIO端口, 只需要修改下面的代码即可改变控制的OLED引脚
+#define OLED_SCLK_GPIO_PORT	GPIOC			// GPIO端口
+#define OLED_SCLK_GPIO_CLK	RCC_APB2Periph_GPIOC			// GPIO端口时钟
+#define OLED_SCLK_GPIO_PIN	GPIO_Pin_14			// 相应引脚号
 
-#define OLED_SDIN_GPIO_PORT    	GPIOB			              /* GPIO端口 */
-#define OLED_SDIN_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define OLED_SDIN_GPIO_PIN		GPIO_Pin_5			        /* 相应引脚号 */
+#define OLED_SDIN_GPIO_PORT	GPIOB			// GPIO端口
+#define OLED_SDIN_GPIO_CLK	RCC_APB2Periph_GPIOB			// GPIO端口时钟
+#define OLED_SDIN_GPIO_PIN	GPIO_Pin_5			// 相应引脚号
 
-#define OLED_RST_GPIO_PORT    	GPIOB			              /* GPIO端口 */
-#define OLED_RST_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define OLED_RST_GPIO_PIN		GPIO_Pin_4			        /* 相应引脚号 */
+#define OLED_RST_GPIO_PORT	GPIOB			// GPIO端口
+#define OLED_RST_GPIO_CLK	RCC_APB2Periph_GPIOB			// GPIO端口时钟
+#define OLED_RST_GPIO_PIN	GPIO_Pin_4			// 相应引脚号
 
-#define OLED_RS_GPIO_PORT    	GPIOB			              /* GPIO端口 */
-#define OLED_RS_GPIO_CLK 	    RCC_APB2Periph_GPIOB		/* GPIO端口时钟 */
-#define OLED_RS_GPIO_PIN		GPIO_Pin_3			        /* 相应引脚号 */
+#define OLED_RS_GPIO_PORT	GPIOB			// GPIO端口
+#define OLED_RS_GPIO_CLK	RCC_APB2Periph_GPIOB			// GPIO端口时钟
+#define OLED_RS_GPIO_PIN	GPIO_Pin_3			// 相应引脚号
 
 
 

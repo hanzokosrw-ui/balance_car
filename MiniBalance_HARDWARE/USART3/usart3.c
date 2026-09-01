@@ -1,31 +1,6 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "usart3.h"
 u8 Usart3_Receive;
-/**************************************************************************
-Function: Usart3 initialization
-Input   : bound:Baud rate
-Output  : none
-函数功能：蓝牙串口3初始化
-入口参数：bound:波特率
-返回  值：无
-**************************************************************************/
+// Function: Usart3 initialization - 蓝牙串口3初始化
 void uart3_init(u32 bound)
 {  	 
 	  //GPIO端口设置
@@ -65,14 +40,7 @@ void uart3_init(u32 bound)
 
 }
 
-/**************************************************************************
-Function: Receive interrupt function
-Input   : none
-Output  : none
-函数功能：串口3接收中断
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Receive interrupt function - 串口3接收中断
 void USART3_IRQHandler(void)
 {	
 	if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) //接收到数据

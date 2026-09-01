@@ -1,25 +1,11 @@
 #include "sys.h" 
-/**************************************************************************
-Function: Set the vector table offset address
-Input   : Base site 	 Offsets
-Output  : none
-函数功能：设置向量表偏移地址
-入口参数：NVIC_VectTab:基址		Offset:偏移量	
-返回  值：无
-**************************************************************************/ 		 
+// Function: Set the vector table offset address - 设置向量表偏移地址 		 
 void MY_NVIC_SetVectorTable(u32 NVIC_VectTab, u32 Offset)	 
 { 	   	 
 	SCB->VTOR = NVIC_VectTab|(Offset & (u32)0x1FFFFF80);//设置NVIC的向量表偏移寄存器
 																											//用于标识向量表是在CODE区还是在RAM区
 }
-/**************************************************************************
-Function: Set NVIC group
-Input   : NVIC_Group
-Output  : none
-函数功能：设置中断分组
-入口参数：NVIC_Group:NVIC分组 0~4 总共5组 	
-返回  值：无
-**************************************************************************/ 
+// Function: Set NVIC group - 设置中断分组 
 void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group)	 
 { 
 	u32 temp,temp1;	  
@@ -31,22 +17,7 @@ void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group)
 	temp|=temp1;	   
 	SCB->AIRCR=temp;  //设置分组	    	  				   
 }
-/**************************************************************************
-Function: Set NVIC group
-Input   : NVIC_PreemptionPriority	NVIC_SubPriority	NVIC_Channel	NVIC_Group
-Output  : none
-函数功能：设置中断分组
-入口参数：抢占优先级	响应优先级 中断编号	中断分组号
-返回  值：无
-* 中断分组 | 作用
- * --------+--------------------------------------
- * 组0     | 0位抢占优先级,4位响应优先级
- * 组1     | 1位抢占优先级,3位响应优先级
- * 组2     | 2位抢占优先级,2位响应优先级
- * 组3     | 3位抢占优先级,1位响应优先级
- * 组4     | 4位抢占优先级,0位响应优先级
- *NVIC_SubPriority和NVIC_PreemptionPriority的原则是,数值越小,越优先
-**************************************************************************/   
+// Function: Set NVIC group - 设置中断分组   
 void MY_NVIC_Init(u8 NVIC_PreemptionPriority,u8 NVIC_SubPriority,u8 NVIC_Channel,u8 NVIC_Group)	 
 { 																									//注意优先级不能超过设定的组的范围!否则会有意想不到的错误
 	u32 temp;	
@@ -57,16 +28,7 @@ void MY_NVIC_Init(u8 NVIC_PreemptionPriority,u8 NVIC_SubPriority,u8 NVIC_Channel
 	NVIC->ISER[NVIC_Channel/32]|=(1<<NVIC_Channel%32);//使能中断位(要清除的话,相反操作就OK) 
 	NVIC->IP[NVIC_Channel]|=temp<<4;									//设置响应优先级和抢断优先级   	    	  				   
 } 
-/**************************************************************************
-Function: External interrupt function configuration
-Input   : GPIOx：General-purpose input/output	 BITx：The port needed enable
-					TRIM：Trigger mode
-Output  : none
-函数功能：外部中断函数配置
-入口参数：GPIOx:0~6,代表GPIOA~G；
-					BITx:需要使能的位;		TRIM:触发模式,1,下升沿;2,上降沿;3，任意电平触发
-返回  值：无
-**************************************************************************/
+// Function: External interrupt function configuration - 外部中断函数配置
 //该函数一次只能配置1个IO口,多个IO口,需多次调用
 //该函数会自动开启对应中断,以及屏蔽线     	    
 void Ex_NVIC_Config(u8 GPIOx,u8 BITx,u8 TRIM) 
@@ -84,14 +46,7 @@ void Ex_NVIC_Config(u8 GPIOx,u8 BITx,u8 TRIM)
  	if(TRIM&0x01)EXTI->FTSR|=1<<BITx;//line BITx上事件下降沿触发
 	if(TRIM&0x02)EXTI->RTSR|=1<<BITx;//line BITx上事件上升降沿触发
 } 	  
-/**************************************************************************
-Function: Reset all clock registers
-Input   : none
-Output  : none
-函数功能：把所有时钟寄存器复位	
-入口参数：无
-返回  值：无
-**************************************************************************/
+// Function: Reset all clock registers - 把所有时钟寄存器复位
 //不能在这里执行所有外设复位!否则至少引起串口不工作.		    
 //把所有时钟寄存器复位			  
 void MYRCC_DeInit(void)
@@ -139,14 +94,7 @@ __asm void MSR_MSP(u32 addr)
     BX r14
 }
 
-/**************************************************************************
-Function: Go to standby mode
-Input   : none
-Output  : none
-函数功能：进入待机模式
-入口参数：无
-返回  值：无
-**************************************************************************/  	  
+// Function: Go to standby mode - 进入待机模式  	  
 void Sys_Standby(void)
 {
 	SCB->SCR|=1<<2;							//使能SLEEPDEEP位 (SYS->CTRL)	   
@@ -156,26 +104,12 @@ void Sys_Standby(void)
 	PWR->CR|=1<<1;          		//PDDS置位		  
 	WFI_SET();				 					//执行WFI指令		 
 }	     
-/**************************************************************************
-Function: System soft reset
-Input   : none
-Output  : none
-函数功能：系统软复位
-入口参数：无
-返回  值：无
-**************************************************************************/  
+// Function: System soft reset - 系统软复位  
 void Sys_Soft_Reset(void)
 {   
 	SCB->AIRCR =0X05FA0000|(u32)0x04;	  
 } 		 
-/**************************************************************************
-Function: Set JTAG mode
-Input   : mode:JTAG, swd mode settings；00，all enable；01，enable SWD；10，Full shutdown
-Output  : none
-函数功能：设置JTAG模式
-入口参数：mode:jtag,swd模式设置;00,全使能;01,使能SWD;10,全关闭;	
-返回  值：无
-**************************************************************************/
+// Function: Set JTAG mode - 设置JTAG模式
 //#define JTAG_SWD_DISABLE   0X02
 //#define SWD_ENABLE         0X01
 //#define JTAG_SWD_ENABLE    0X00	
@@ -188,14 +122,7 @@ void JTAG_Set(u8 mode)
 	AFIO->MAPR&=0XF8FFFFFF; //清除MAPR的[26:24]
 	AFIO->MAPR|=temp;       //设置jtag模式
 } 
-/**************************************************************************
-Function: System clock initialization function
-Input   : pll：Selected frequency multiplication，Starting at 2, the maximum value is 16
-Output  : none
-函数功能：系统时钟初始化函数
-入口参数：pll:选择的倍频数，从2开始，最大值为16		
-返回  值：无
-**************************************************************************/ 
+// Function: System clock initialization function - 系统时钟初始化函数 
 void Stm32_Clock_Init(u8 PLL)
 {
 	unsigned char temp=0;   

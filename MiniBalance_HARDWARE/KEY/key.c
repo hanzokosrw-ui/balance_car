@@ -1,30 +1,5 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #include "key.h"
-/**************************************************************************
-Function: Key initialization
-Input   : none
-Output  : none
-函数功能：按键初始化
-入口参数：无
-返回  值：无 
-**************************************************************************/
+// Function: Key initialization - 按键初始化
 void KEY_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -38,14 +13,7 @@ void KEY_Init(void)
   GPIO_Init(GPIOC, &GPIO_InitStructure);					      //根据设定参数初始化GPIOA 
 } 
 
-/*************************************************************************
-Function:Mode Choose
-Iput    :None
-Output  :Noce
-函数功能：小车模式选择
-入口参数：无
-返回  值：无
-*************************************************************************/
+// Function: Mode Choose - 小车模式选择
 void Mode_Choose(void)
 {
 	switch(User_Key_Scan())
@@ -75,14 +43,7 @@ void Mode_Choose(void)
 		}
 }
 
-/*************************************************************************
-Function:User_Key_Scan
-Input:None
-Output:Key_status
-函数功能：用户按键检测
-入口参数：无
-返回值  ：按键状态
-**************************************************************************/
+// Function: User_Key_Scan - 用户按键检测
 //放在5ms中断中调用
 uint8_t User_Key_Scan(void)
 {

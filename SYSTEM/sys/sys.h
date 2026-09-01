@@ -1,21 +1,3 @@
-/***********************************************
-公司：轮趣科技(东莞)有限公司
-品牌：WHEELTEC
-官网：wheeltec.net
-淘宝店铺：shop114407458.taobao.com 
-速卖通: https://minibalance.aliexpress.com/store/4455017
-版本：V1.0
-修改时间：2022-09-05
-
-Brand: WHEELTEC
-Website: wheeltec.net
-Taobao shop: shop114407458.taobao.com 
-Aliexpress: https://minibalance.aliexpress.com/store/4455017
-Version: V1.0
-Update：2022-09-05
-
-All rights reserved
-***********************************************/
 #ifndef __SYS_H
 #define __SYS_H	  
 #include <stm32f10x.h>   
@@ -105,7 +87,7 @@ All rights reserved
 #define SWD_ENABLE         0X01
 #define JTAG_SWD_ENABLE    0X00	
 
-/* 直接操作寄存器的方法控制IO */
+// 直接操作寄存器的方法控制IO
 #define	digitalHi(p,i)		 {p->BSRR=i;}	 	//输出为高电平		
 #define digitalLo(p,i)		 {p->BRR=i;}	 	//输出低电平
 #define digitalToggle(p,i) {p->ODR ^=i;} 		//输出反转状态
