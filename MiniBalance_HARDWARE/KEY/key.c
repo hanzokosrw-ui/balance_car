@@ -51,35 +51,24 @@ void Mode_Choose(void)
 	switch(User_Key_Scan())
 		{
 			//单击按键可以切换到
-			//1.普通遥控模式
-			//2.雷达巡航模式
-			//3.雷达跟随模式
-			//4.电磁巡线模式
-			//5.CCD巡线模式
-			//长按按键进入上位机
+			//0.普通遥控模式
+			//6.ROS模式
+			//7.超声波避障模式
+			//8.超声波跟随模式
+			//9.红外循迹模式
 			case Click:
 				Mode++;
-				if(Mode == ELE_Line_Patrol_Mode)
-					ELE_ADC_Init();							//初始化电磁巡线模式
-				
-				else if(Mode == CCD_Line_Patrol_Mode)		//CCD巡线模式
+				if(Mode == 1)							//跳过已删除的 1~5 号模式，直接切到 ROS 模式
 				{
-					CCD_Init();								//CCD初始化，CCD模块和电磁巡线模块共用一个接口，两个不能同时使用
+					Mode = ROS_Mode;
 				}
-				else if(Mode == 9)							//5种模式循环切换
+				else if(Mode == IRDM_Line_Patrol_Mode)	//红外循迹模式
+				{
+					TrackModule_Init();					//初始化红外循迹引脚
+				}
+				else if(Mode == 10)						//模式循环切换
 				{
 					Mode = Normal_Mode;
-				}
-				break;
-			case Long_Press:
-				Flag_Show = !Flag_Show;								//长按 进入/退出 上位机模式
-				break;
-			case Double_Click:										
-				if((Mode == ELE_Line_Patrol_Mode)||(Mode==CCD_Line_Patrol_Mode))					//巡线状态时，双击可以打开/关闭雷达检测障碍物，默认打开
-				{
-					Lidar_Detect = !Lidar_Detect;
-					if(Lidar_Detect == Lidar_Detect_OFF)
-						memset(Dataprocess,0, sizeof(PointDataProcessDef)*40);		//用于雷达检测障碍物的数组清零
 				}
 				break;
 			default:break;

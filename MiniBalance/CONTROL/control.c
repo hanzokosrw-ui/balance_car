@@ -17,6 +17,7 @@ Update：2022-09-05
 All rights reserved
 ***********************************************/
 #include "control.h"	
+#include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 /**************************************************************************
 Function: Control function
@@ -50,7 +51,6 @@ int EXTI9_5_IRQHandler(void)
         }
 		if(++Ros_count == 10)
 		{
-			Lidar_flag=0;
 			Ros_send_flag=1;
 			Ros_count=0;
 		}
@@ -65,20 +65,13 @@ int EXTI9_5_IRQHandler(void)
 		if(Mode==Ultrasonic_Avoid_Mode||Mode==Ultrasonic_Follow_Mode)		
 	       Read_Distane();                                  //超声波读取距离   
 		Select_Zhongzhi();                                  //机械中值选择
-		Normal();                                           //普通模式
-		Lidar_Avoid();                                      //雷达避障模式
-		Lidar_Follow();                                     //雷达跟随模式
-		Lidar_Straight();                                   //雷达走直线模式 
-		ELE_Mode();                                         //电磁循迹模式
-		CCD_Mode();                                         //CCD巡线模式运行
+		IRDM_Mode();                                        //红外循迹模式
 		if(Mode==Normal_Mode)	Led_Flash(100);             //LED闪烁;常规模式 1s改变一次指示灯的状态	
 		else Led_Flash(0);                                  //LED常亮;其余模式
 		Balance_Pwm=Balance(Angle_Balance,Gyro_Balance);    //平衡PID控制 Gyro_Balance平衡角速度极性：前倾为正，后倾为负
 		Velocity_Pwm=Velocity(Encoder_Left,Encoder_Right);  //速度环PID控制	记住，速度反馈是正反馈，就是小车快的时候要慢下来就需要再跑快一点
-		if(Mode ==CCD_Line_Patrol_Mode)                     //CCD循迹下的转向环控制 
-			Turn_Pwm=CCD_turn(CCD_Zhongzhi,Gyro_Turn);
-		else if(Mode==ELE_Line_Patrol_Mode)                 //ELE循迹下的转向环控制
-			Turn_Pwm=ELE_turn(Encoder_Left,Encoder_Right,Gyro_Turn);
+		if(Mode ==IRDM_Line_Patrol_Mode)                    //红外循迹下的转向环控制
+			Turn_Pwm=IRDM_turn(turn_diff,Gyro_Turn);
 		else
 		  Turn_Pwm=Turn(Gyro_Turn);														//转向环PID控制     
 
@@ -426,177 +419,8 @@ void Get_Velocity_Form_Encoder(int encoder_left,int encoder_right)
 	Velocity_Right = Rotation_Speed_R*PI*Diameter_67;		//求出编码器速度=转速*周长
 }
 
-/**************************************************************************
-Function: Normal
-Input   : none
-Output  : none
-函数功能：普通模式
-入口参数：无
-返回  值：无
-**************************************************************************/
-void Normal(void)
-{
-	u8 j;
-		if(Mode == Normal_Mode)									  //普通的控制模式可进行手柄控制
-	{				
-		for(j=0;j<225;j++) 	
-	 {
-		 Distance = Dataprocess[j].distance;           //正常模式下在OLED显示距离
-	 }
-	 if(PS2_ON_Flag == RC_ON)		  					 //开启手柄控制时，需先按start按键，然后上拉左摇杆直到出现 PS2 字样
-			PS2_Control();
-	 else if(Remote_ON_Flag == RC_ON)
-		 Remote_Control();                             //开启航模控制
-	}
-}
-/**************************************************************************
-Function: Lidar_Avoid
-Input   : none
-Output  : none
-函数功能：雷达前进避障模式
-入口参数：无
-返回  值：无
-**************************************************************************/
-void Lidar_Avoid(void)
-{
-	u8 i;
-	u8 avoid_Num=0;//需要避障的点
-	float Angle_Sum=0;//确认障碍物在哪一方向的变量
-	u8 too_close = 0;//判断障碍物是否太近的变量
-	if(Mode==Lidar_Avoid_Mode&&Flag_Left!=1&&Flag_Right!=1)
-	{
-		for(i=0;i<225;i++)
-		{
-			if((Dataprocess[i].angle<avoid_Angle1)||(Dataprocess[i].angle>avoid_Angle2))//小车前进方向100度范围
-			{		
-				if((Dataprocess[i].distance>0)&&(Dataprocess[i].distance<avoid_Distance))//距离小于300mm需要避障
-				{
-					Distance=Dataprocess[i].distance;
-					avoid_Num++;
-					if(Dataprocess[i].angle>310) Angle_Sum += (Dataprocess[i].angle-360);//将310~360转化为-50到0
-					else if(Dataprocess[i].angle<50) Angle_Sum+= Dataprocess[i].angle;
-					if(Dataprocess[i].distance<150)			too_close++;//靠得太近，需要后退
-				}
-			}
-		}
-		if(avoid_Num<8)
-		{
-		  Move_X=avoid_speed;                                           //给小车一个200mm/s的速度，不要大于800
-			Move_Z=0;
-		}
-		else if(avoid_Num>8)
-		{
-			 Move_X=0;
-	    	if(too_close>10) Move_X=-avoid_speed,Move_Z=0;              //靠的太近，后退一点
-				else
-				{
-					if(Angle_Sum>0)      
-					{
-						Move_Z=-turn_speed;//障碍物靠右，左转
-					}
-					else   Move_Z=turn_speed; //障碍物靠左，右转
-				}					
-		}
- }
-}
 
-/**************************************************************************
-Function: Lidar_Avoid
-Input   : none
-Output  : none
-函数功能：雷达跟随模式
-入口参数：无
-返回  值：无
-**************************************************************************/
-void Lidar_Follow(void)
-{
-	u8 i;
-	u8 follow_num=0;                //判断跟随的点
-	u16 mini_distance = 65535;      //要跟随的距离，就是最小距离点的距离
-	static float angle =0;                 //跟随点的角度
-	static float last_angle = 0;           //跟随点的上一个角度
-	u8 data_count = 0;
-	if(Mode==Lidar_Follow_Mode&&Flag_Left!=1&&Flag_Right!=1)
-	{
-		for(i=0;i<225;i++)
-		{
-			 if((0<Dataprocess[i].distance) && (Dataprocess[i].distance<Follow_distance))//在0~1500mm中选择最近的点来跟随
-			 {
-				 follow_num++;
-				 if(Dataprocess[i].distance<mini_distance)                  //判断出最小距离的点
-				 {
-					 mini_distance = Dataprocess[i].distance;
-					 angle = Dataprocess[i].angle;
-					 Distance = mini_distance;                                     //在oled上显示要跟随点的距离
-				 }
-			 }
-	  }
-	if(angle>180)
-		  angle -= 360;				//0--360度转换成0--180；-180--0（顺时针）
-	if(angle-last_angle>10 ||angle-last_angle<-10)	//做一定消抖，波动大于10度的需要做判断
-	{
-		if(++data_count == 60)		//连续60次采集到的值(300ms后)和上次的比大于10度，此时才是认为是有效值
-		{
-			data_count = 0;
-			last_angle = angle;
-		}
-	}
-	else							//波动小于10度的可以直接认为是有效值
-	{
-			data_count = 0;	
-			last_angle = angle;
-	}
-	if(follow_num>5) 	
-	{
-		Move_X=Lidar_follow_PID(mini_distance,300);//这个的距离pid时直接作用在速度环，所以要变小一点(Move的范围在0~800)
-		Move_Z=Follow_Turn_PID(angle,0);//转向PID直接作用在转向环
-	}
-	else
-	{
-		Move_X = 0;
-		Move_Z = 0;
-	}
-	if(Move_X>600)    Move_X=600;
- }
-}
-/**************************************************************************
-Function: Lidar_Straight
-Input   : none
-Output  : none
-函数功能：雷达走直线模式
-入口参数：无
-返回  值：无
-**************************************************************************/
-void Lidar_Straight(void) 
-{
-	static u16 target_distance=0;
-	u8 i;
-	u16 current_distance=target_distance;
-	static u16 Limit_distance=0;   //雷达最大的探测距离
-	if(Mode==Lidar_Straight_Mode&&Flag_Left!=1&&Flag_Right!=1)
-	{
-		 Move_X=Initial_speed;//给小车一个初始速度
-		 for(i=0;i<225;i++)
-	  {
-		  if((Dataprocess[i].angle>71)&&(Dataprocess[i].angle<74))//取雷达的70到75度范围的点做比较点
-		 {
-			 if(determine<Limit_time) //在模式转换到Straight模式3秒后确定我们想要的距离
-			 {
-				 target_distance=Dataprocess[i].distance;
-				 Limit_distance=target_distance+200;//比目标距离大200mm,主要避免参照物的消失导致小车快速转向
-				 determine++;
-				 if(determine==(Limit_time-1)) determine=Limit_time;
-			 }
-			 if(Dataprocess[i].distance<(Limit_distance))//限制一下雷达的探测距离
-			 {
-				 current_distance=Dataprocess[i].distance;//确定距离
-			   Distance=Dataprocess[i].distance;
-			 }
-		 }
-	 }
-	 Move_Z=Distance_Adjust_PID(current_distance,target_distance);//雷达距离pid
-	}
-}
+
 
 /**************************************************************************
 Function: Select_Zhongzhi
@@ -606,78 +430,46 @@ Output  : none
 入口参数：无
 返回  值：无
 **************************************************************************/
-void Select_Zhongzhi(void)                   //机械中值选择，避免安装上电磁巡线、CCD巡线装备时小车往前冲的现象
+void Select_Zhongzhi(void)                   //机械中值选择，避免安装巡线装备时小车往前冲的现象
 {
-	if(Mode == ELE_Line_Patrol_Mode)
-		Middle_angle = -9;
-	else if(Mode == CCD_Line_Patrol_Mode)
-		Middle_angle = -4;
+	if(Mode == IRDM_Line_Patrol_Mode)
+		Middle_angle = -6;                   //红外巡线机械中值，视安装位置调节
 	else   Middle_angle = 1;
 }
 
 /**************************************************************************
-Function: Limiting function
-Input   : Value
-Output  : none
-函数功能：限幅函数
-入口参数：幅值
-返回  值：无
-**************************************************************************/
-int target_limit_int(int insert,int low,int high)
-{
-    if (insert < low)
-        return low;
-    else if (insert > high)
-        return high;
-    else
-        return insert;	
-}
-
-/**************************************************************************
-Function: The remote control command of model aircraft is processed
+Function: IRDM_Mode
 Input   : none
 Output  : none
-函数功能：对航模遥控控制命令进行处理
+函数功能：红外循迹模式运行（在10ms控制中断中调用）
 入口参数：无
 返回  值：无
 **************************************************************************/
-void Remote_Control(void)
+void IRDM_Mode(void)
 {
-	  //Data within 1 second after entering the model control mode will not be processed
-	  //对进入航模控制模式后1秒内的数据不处理
-    static u8 thrice=100;
-    int Threshold=100;
-
-	  //limiter //限幅
-    int LX,RY; 
-//	  static float Target_LX,Target_LY,Target_RY,Target_RX;
-		Remoter_Ch1=target_limit_int(Remoter_Ch1,1000,2000);
-		Remoter_Ch2=target_limit_int(Remoter_Ch2,1000,2000);
-//        Remoter_Ch3=target_limit_int(Remoter_Ch3,1000,2000);
-		// Front and back direction of left rocker. Control forward and backward.
-	  //左摇杆前后方向。控制前进后退。
-       LX=Remoter_Ch2-1500;	
-		 //Right stick left and right. To control the rotation. 
-		//右摇杆左右方向。控制自转。
-	  RY=Remoter_Ch1-1500;		//
-	
-   
-
-    if(LX>-Threshold&&LX<Threshold)LX=0;
-    if(RY>-Threshold&&RY<Threshold)RY=0;
-		
-		
-		//The remote control command of model aircraft is processed
-		//对航模遥控控制命令进行处理
-        Move_X= LX; 
-		Move_Z= RY; 
-        Move_X= Move_X*1.8;//*Remote_RCvelocity/350.0;
-		Move_Z= Move_Z*2.3;  
-			 
-		//Data within 1 second after entering the model control mode will not be processed
-	  //对进入航模控制模式后1秒内的数据不处理
-      if(thrice>0) Move_X=0,Move_Z=0,thrice--;
-			
+	if(Mode == IRDM_Line_Patrol_Mode && Flag_Left != 1 && Flag_Right != 1)
+	{
+		IRDM_line_inspection();              //读取传感器，更新 base_speed_mm / turn_diff
+		Move_X = base_speed_mm;              //巡线速度（mm/s）
+	}
 }
+
+/**************************************************************************
+Function: IRDM_turn
+Input   : turn_diff：转向差速；gyro：Z轴陀螺仪
+Output  : 转向控制PWM（右转为正，左转为负）
+函数功能：红外循迹模式转向控制（PD）
+入口参数：无
+返回  值：无
+**************************************************************************/
+int IRDM_turn(float turn_diff, float gyro)
+{
+	float Turn;
+	float Kp = 60, Kd = 0.2;                 //转向PD参数，可调
+	Turn = -turn_diff * Kp - gyro * Kd;      //右转为正
+	return Turn;
+}
+
+
 
 

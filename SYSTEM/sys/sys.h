@@ -95,13 +95,10 @@ All rights reserved
 #include "mpu6050.h"
 #include "show.h"					
 #include "exti.h"
-#include "DataScope_DP.h"
 #include "control.h"
 #include "filter.h"	
-#include "Lidar.h"
 #include "beep.h"
-#include "ELE_CCD.h"
-#include "pstwo.h"
+#include "TrackModule.h"
 #include "capture.h"
 ////JTAG模式设置定义
 #define JTAG_SWD_DISABLE   0X02
@@ -112,15 +109,11 @@ All rights reserved
 #define	digitalHi(p,i)		 {p->BSRR=i;}	 	//输出为高电平		
 #define digitalLo(p,i)		 {p->BRR=i;}	 	//输出低电平
 #define digitalToggle(p,i) {p->ODR ^=i;} 		//输出反转状态
-#define Lidar_Detect_ON						1				//电磁巡线是否开启雷达检测障碍物
-#define Lidar_Detect_OFF					0
 extern u8 Ros_Rate ;
 extern u8 Ros_count,Ros_send_flag;
 extern u8 Pick_up_stop;                       //检查是否被拿起标志位
 extern int Middle_angle;                      //机械中值默认为0
-extern u8 Lidar_Detect;
 extern u8 Mode ;                                                    //模式选择，默认是普通的控制模式
-extern u8 PS2_ON_Flag,Remote_ON_Flag;		//默认所有方式不控制
 extern float RC_Velocity,RC_Turn_Velocity;			//遥控控制的速度
 extern u8 Way_Angle;                                       				 //获取角度的算法，1：四元数  2：卡尔曼  3：互补滤波
 extern int Motor_Left,Motor_Right;                                 //电机PWM变量 应是motor的 向moto致敬	
@@ -130,15 +123,13 @@ extern int Voltage;               																 //电池电压采样相关的变量
 extern float Angle_Balance,Gyro_Balance,Gyro_Turn;     						 //平衡倾角 平衡陀螺仪 转向陀螺仪
 extern int Temperature;
 extern u32 Distance;                                          		//雷达测距
-extern u16 determine;                                       //确定走直线的距离值
 extern int Encoder_Left,Encoder_Right;             					//左右编码器的脉冲计数
 extern float Move_X,Move_Z;
-extern u8 Lidar_flag,Flag_follow,Flag_avoid,Flag_straight,delay_50,PID_Send;
+extern u8 delay_50,PID_Send;
 extern volatile u8 delay_flag;
 extern float Acceleration_Z;                       //Z轴加速度计  
 extern float Balance_Kp,Balance_Kd,Velocity_Kp,Velocity_Ki,Turn_Kp,Turn_Kd;
 extern float Distance_KP ,Distance_KD  ,Distance_KI ;	//距离调整PID参数
-extern u8 CCD_Zhongzhi,CCD_Yuzhi;                 //线性CCD相关
 /////////////////////////////////////////////////////////////////  
 void Stm32_Clock_Init(u8 PLL);  //时钟初始化  
 void Sys_Soft_Reset(void);      //系统软复位

@@ -7,27 +7,22 @@
 #define DH2 PAin(11)
 #define DH1 PAin(8)
 
-typedef enum
-{
-	TRACK_STATE_UNKNOWN = 0,
-	TRACK_STATE_CROSSROAD = 1,
-	TRACK_STATE_LEFT_RIGHT_ANGLE = 2,
-	TRACK_STATE_RIGHT_RIGHT_ANGLE = 3,
-	TRACK_STATE_LEFT_SHARP_TURN = 4,
-	TRACK_STATE_RIGHT_SHARP_TURN = 5,
-	TRACK_STATE_LEFT_FINE_TUNE = 6,
-	TRACK_STATE_RIGHT_FINE_TUNE = 7,
-	TRACK_STATE_STRAIGHT = 8,
-	TRACK_STATE_LOST = 9
-} TrackState;
+// 红外传感器引脚配置宏（与 DH1~DH4 对应，改硬件接线时只需改这里）
+#define TRACK_GPIO_CLK      RCC_APB2Periph_GPIOA                                   // 引脚时钟
+#define TRACK_GPIO_PORT     GPIOA                                                  // 引脚端口
+#define TRACK_GPIO_PIN      (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_2 | GPIO_Pin_3)   // DH1~DH4
+
+extern float Turn90Angle ;   // 直角弯转向角度
+extern float TurnMaxAngle;   // 大弯道转向角度
+extern float TurnMidAngle;   // 中等转向角度（丢线时使用）
+extern float TurnMinAngle;   // 微调转向角度
+extern float BaseSpeed;
+extern float ForwardLimit;
+// 速度参数（单位：m/s）
+extern float base_speed_mm ;        // 基础速度（mm/s）
+extern float turn_diff ;            // 转向差速（左+右-，单位：mm/s）
 
 void TrackModule_Init(void);
-u8 TrackModule_ReadTruthValue(void);
-TrackState TrackModule_GetState(u8 truth_value);
-const char *TrackModule_GetStateName(TrackState state);
-
-
+void IRDM_line_inspection(void);
 #endif
-
-// by codex
 

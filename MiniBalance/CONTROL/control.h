@@ -35,30 +35,10 @@ All rights reserved
 
 //小车各模式定义
 #define Normal_Mode							0
-#define Lidar_Avoid_Mode					1
-#define Lidar_Follow_Mode					2
-#define Lidar_Straight_Mode                 3
-#define ELE_Line_Patrol_Mode				4
-#define CCD_Line_Patrol_Mode				5
 #define ROS_Mode				            6
 #define Ultrasonic_Avoid_Mode               7
 #define Ultrasonic_Follow_Mode              8
-
-//避障模式的参数
-#define  avoid_Distance 350//避障距离300mm
-#define avoid_Angle1 50 //避障的角度，在310~360、0~50°的范围
-#define avoid_Angle2 310
-#define avoid_speed 200    //避障速度
-#define turn_speed 1000;    //避障转向速度
-
-//雷达走直线的参数
-#define Initial_speed 250//小车的初始速度大概为200mm每秒
-#define Limit_time 500   //限制时间，5ms中断*数值=时间 ，这里就是3s
-#define refer_angle1  71 //参照物的角度1
-#define refer_angle2  74 //参照物的角度2
-
-//雷达跟随参数
-#define Follow_distance 1500  //雷达跟随模式最远距离
+#define IRDM_Line_Patrol_Mode               9   //红外循迹模式
 
 int EXTI9_5_IRQHandler(void);
 int Balance(float angle,float gyro);
@@ -75,14 +55,9 @@ int Pick_Up(float Acceleration,float Angle,int encoder_left,int encoder_right);
 int Put_Down(float Angle,int encoder_left,int encoder_right);
 void Get_Velocity_Form_Encoder(int encoder_left,int encoder_right);
 void Choose(int encoder_left,int encoder_right);
-void Read_distance(void);
-void Lidar_Avoid(void);
-void Lidar_Follow(void);
-void Lidar_Straight(void);
-void Lidar_Avoid(void);
 void Select_Zhongzhi(void);
-void Normal(void);
-void Remote_Control(void);
+void IRDM_Mode(void);
+int IRDM_turn(float turn_diff,float gyro);
 extern short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
 #endif

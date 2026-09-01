@@ -22,9 +22,4 @@ All rights reserved
 extern float Velocity_Left,Velocity_Right;//左轮速度、右轮速度
 void oled_show(void);
 void APP_Show(void);
-void DataScope(void);
-void OLED_Show_CCD(void);
-void OLED_DrawPoint_Shu(u8 x,u8 y,u8 t);
-
-void OLED_Show_CCD(void);
 #endif

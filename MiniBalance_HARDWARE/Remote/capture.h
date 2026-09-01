@@ -39,7 +39,6 @@ Distance_1,Distance_2,Distance_3,Distance_4;//超声波相关变量
 //超声波和航模遥控的宏定义，只能使用其一
 //选择不需要使用的注释掉
 #define Distance_Capture
-#define PWM_Capture 
 
 
 //超声波触发引脚
@@ -117,38 +116,6 @@ Distance_1,Distance_2,Distance_3,Distance_4;//超声波相关变量
 
 
 
-//航模遥控初始化
-//使用TIM2_CH4,CH3,TIM1_CH4,CH1分别是4路航模
-//捕获PWM的高电平
-#define 			PWM_TIM2_CH4_GPIO_CLK		RCC_APB2Periph_GPIOA
-#define            	PWM_TIM2_CH4_PORT          	GPIOA
-#define            	PWM_TIM2_CH4_PIN           	GPIO_Pin_3
-
-#define 			PWM_TIM2_CH3_GPIO_CLK		RCC_APB2Periph_GPIOA
-#define            	PWM_TIM2_CH3_PORT          	GPIOA
-#define            	PWM_TIM2_CH3_PIN           	GPIO_Pin_2
-
-#define 			PWM_TIM2					TIM2
-#define            	PWM_TIM2_APBxClock_FUN     	RCC_APB1PeriphClockCmd
-#define            	PWM_TIM2_CLK               	RCC_APB1Periph_TIM2
-#define            	PWM_TIM2_IRQ               	TIM2_IRQn
-#define           	PWM_TIM2_IRQHandler       	TIM2_IRQHandler
-
-#define 			PWM_TIM1_CH4_GPIO_CLK		RCC_APB2Periph_GPIOA
-#define            	PWM_TIM1_CH4_PORT          	GPIOA
-#define            	PWM_TIM1_CH4_PIN           	GPIO_Pin_11
-
-#define 			PWM_TIM1_CH1_GPIO_CLK		RCC_APB2Periph_GPIOA
-#define            	PWM_TIM1_CH1_PORT          	GPIOA
-#define            	PWM_TIM1_CH1_PIN           	GPIO_Pin_8
-
-#define 			PWM_TIM1					TIM1
-#define            	PWM_TIM1_APBxClock_FUN     	RCC_APB2PeriphClockCmd
-#define            	PWM_TIM1_CLK               	RCC_APB2Periph_TIM1
-#define            	PWM_TIM1_CC_IRQn             TIM1_CC_IRQn
-#define            	PWM_TIM1_UP_IRQn            TIM1_UP_IRQn
-#define           	PWM_TIM1_CC_IRQHandler      TIM1_CC_IRQHandler
-#define           	PWM_TIM1_UP_IRQHandler      TIM1_UP_IRQHandler
 
 
 
@@ -172,17 +139,9 @@ typedef struct
 	uint16_t  Capture_Period;       // 自动重装载寄存器更新标志 
 }TIM_ICUserValueTypeDef;
 
- //Variables related to remote control acquisition of model aircraft
-//航模遥控采集相关变量
-extern int Remoter_Ch1,Remoter_Ch2,Remoter_Ch3;
-//Model aircraft remote control receiver variable
-//航模遥控接收变量
-extern int L_Remoter_Ch1,L_Remoter_Ch2,L_Remoter_Ch3; 
-extern u16 Distance1,Distance2,Distance3,Distance4;	
-
+ 
 void Read_Distane(void);        
 void Distance_Cap_Init(u16 arr,u16 psc);
-void PWM_Cap_Init(u16 arr,u16 psc);
 
 
 #endif

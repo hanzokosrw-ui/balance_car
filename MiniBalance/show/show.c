@@ -30,12 +30,10 @@ Output  : none
 void oled_show(void)
 {
 	u8 truth_value;
-	TrackState track_state;
 
 	 memset(OLED_GRAM,0, 128*8*sizeof(u8));	//GRAM清零但不立即刷新，防止花屏
 
-	truth_value = TrackModule_ReadTruthValue();
-	track_state = TrackModule_GetState(truth_value);
+	truth_value = ((DH1?1:0)<<3) | ((DH2?1:0)<<2) | ((DH3?1:0)<<1) | (DH4?1:0);
 
 	OLED_ShowString(0,0,"TRACK:");
 	OLED_ShowNumber(48,0,(truth_value >> 3) & 0x01,1,12);
@@ -43,7 +41,7 @@ void oled_show(void)
 	OLED_ShowNumber(64,0,(truth_value >> 1) & 0x01,1,12);
 	OLED_ShowNumber(72,0,truth_value & 0x01,1,12);
 	OLED_ShowString(0,16,"STATE:");
-	OLED_ShowString(0,32,(const u8 *)TrackModule_GetStateName(track_state));
+	OLED_ShowNumber(48,16,truth_value,2,12);
 
 													OLED_ShowNumber(40,0,myabs((int)Motor_Right),4,12);
 
@@ -177,66 +175,6 @@ void APP_Show(void)
 	   printf("{B%d:%d:%d}$",(int)Gyro_Balance,(int)Gyro_Balance,(int)Gyro_Balance); //x，y，z轴角度 在APP上面显示波形
 																													//可按格式自行增加显示波形，最多可显示五个
 }
-/**************************************************************************
-Function: Virtual oscilloscope sends data to upper computer
-Input   : none
-Output  : none
-函数功能：虚拟示波器往上位机发送数据 关闭显示屏
-入口参数：无
-返回  值：无
-**************************************************************************/
-void DataScope(void)
-{   
-	u8 i;//计数变量
-	float Vol;								//电压变量
-	unsigned char Send_Count; //串口需要发送的数据个数
-	Vol=(float)Voltage/100;
-	DataScope_Get_Channel_Data( Angle_Balance, 1 );       //显示角度 单位：度（°）
-	DataScope_Get_Channel_Data( Distance/10, 2 );         //显示超声波测量的距离 单位：CM 
-	DataScope_Get_Channel_Data( Vol, 3 );                 //显示电池电压 单位：V
-//		DataScope_Get_Channel_Data( 0 , 4 );   
-//		DataScope_Get_Channel_Data(0, 5 ); //用您要显示的数据替换0就行了
-//		DataScope_Get_Channel_Data(0 , 6 );//用您要显示的数据替换0就行了
-//		DataScope_Get_Channel_Data(0, 7 );
-//		DataScope_Get_Channel_Data( 0, 8 ); 
-//		DataScope_Get_Channel_Data(0, 9 );  
-//		DataScope_Get_Channel_Data( 0 , 10);
-	Send_Count = DataScope_Data_Generate(3);
-	for(i = 0 ; i < Send_Count; i++) 
-	{
-		while((USART1->SR&0X40)==0);  
-		USART1->DR = DataScope_OutPut_Buffer[i]; 
-	}
-}
 
-/**************************************************************************
-Function: OLED_Show_CCD
-Input   : none
-Output  : none
-函数功能：CCD模式显示函数，画点
-入口参数: 无 
-返回  值：无
-**************************************************************************/	 	
 
-void OLED_DrawPoint_Shu(u8 x,u8 y,u8 t)
-{ 
-	u8 i=0;
-	OLED_DrawPoint(x,y,t);
-	OLED_DrawPoint(x,y,t);
-	for(i = 0;i<8; i++)
-	{
-		OLED_DrawPoint(x,y+i,t);
-	}
-}
 
-void OLED_Show_CCD(void)
-{ 
-	u8 i,t;
-	for(i = 0;i<128; i++)
-	{
-		if(CCD_ADV[i]<CCD_Yuzhi) t=1; else t=0;
-		OLED_DrawPoint_Shu(i,0,t);
-	}
-}
-
-// by codex

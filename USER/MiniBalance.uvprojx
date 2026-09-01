@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_ HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\MiniBalance_COER;..\STM32F10x_FWLib\inc;..\MiniBalance_HARDWARE;..\SYSTEM;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\MiniBalance_HARDWARE\IIC;..\MiniBalance_HARDWARE\ENCODER;..\MiniBalance_HARDWARE\OLED;..\MiniBalance\show;..\MiniBalance_HARDWARE\LED;..\MiniBalance_HARDWARE\KEY;..\MiniBalance_HARDWARE\ADC;..\MiniBalance_HARDWARE\MOTOR;..\MiniBalance_HARDWARE\TIMER;..\MiniBalance_HARDWARE\USART3;..\MiniBalance_HARDWARE\EXTI;..\MiniBalance_HARDWARE\DataScope_DP;..\MiniBalance\filter;..\MiniBalance_HARDWARE\STMFLASH;..\MiniBalance_HARDWARE\DMP;..\MiniBalance_HARDWARE\MPU6050;..\MiniBalance\CONTROL;..\MiniBalance_HARDWARE\Lidar;..\MiniBalance_HARDWARE\beep;..\MiniBalance\ELE_CCD;..\MiniBalance_HARDWARE\PSTWO;..\MiniBalance_HARDWARE\Remote;..\MiniBalance_HARDWARE\TrackModule</IncludePath>
+              <IncludePath>..\USER;..\MiniBalance_COER;..\STM32F10x_FWLib\inc;..\MiniBalance_HARDWARE;..\SYSTEM;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\MiniBalance_HARDWARE\IIC;..\MiniBalance_HARDWARE\ENCODER;..\MiniBalance_HARDWARE\OLED;..\MiniBalance\show;..\MiniBalance_HARDWARE\LED;..\MiniBalance_HARDWARE\KEY;..\MiniBalance_HARDWARE\ADC;..\MiniBalance_HARDWARE\MOTOR;..\MiniBalance_HARDWARE\TIMER;..\MiniBalance_HARDWARE\USART3;..\MiniBalance_HARDWARE\EXTI;..\MiniBalance\filter;..\MiniBalance_HARDWARE\STMFLASH;..\MiniBalance_HARDWARE\DMP;..\MiniBalance_HARDWARE\MPU6050;..\MiniBalance\CONTROL;..\MiniBalance_HARDWARE\beep;..\MiniBalance_HARDWARE\Remote;..\MiniBalance_HARDWARE\TrackModule</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -611,16 +611,6 @@
               <FilePath>..\MiniBalance_HARDWARE\EXTI\exti.c</FilePath>
             </File>
             <File>
-              <FileName>Lidar.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MiniBalance_HARDWARE\Lidar\Lidar.c</FilePath>
-            </File>
-            <File>
-              <FileName>pstwo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MiniBalance_HARDWARE\PSTWO\pstwo.c</FilePath>
-            </File>
-            <File>
               <FileName>capture.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MiniBalance_HARDWARE\Remote\capture.c</FilePath>
@@ -646,11 +636,6 @@
               <FilePath>..\MiniBalance\show\show.c</FilePath>
             </File>
             <File>
-              <FileName>DataScope_DP.C</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MiniBalance_HARDWARE\DataScope_DP\DataScope_DP.C</FilePath>
-            </File>
-            <File>
               <FileName>filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MiniBalance\filter\filter.c</FilePath>
@@ -669,11 +654,6 @@
               <FileName>MPU6050.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MiniBalance_HARDWARE\MPU6050\MPU6050.c</FilePath>
-            </File>
-            <File>
-              <FileName>ELE_CCD.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MiniBalance\ELE_CCD\ELE_CCD.c</FilePath>
             </File>
           </Files>
         </Group>
