@@ -71,10 +71,11 @@ void IRDM_line_inspection(void)
             turn_diff = 0;
             break;
         case STATE_LOST://丢线处理
-            if (last_state == STATE_LEFT_SMALL) turn_diff = TurnMidAngle;//继续左转
-			else if (last_state == STATE_RIGHT_SMALL) turn_diff = -TurnMidAngle;//继续右转
-			else if(last_state == STATE_LEFT_BIG ) turn_diff = TurnMaxAngle;//继续左转
-			else if(last_state == STATE_RIGHT_BIG ) turn_diff = -TurnMaxAngle;//继续右转
+            // if (last_state == STATE_LEFT_SMALL) turn_diff = TurnMidAngle;//继续左转
+			// else if (last_state == STATE_RIGHT_SMALL) turn_diff = -TurnMidAngle;//继续右转
+			// else if(last_state == STATE_LEFT_BIG ) turn_diff = TurnMaxAngle;//继续左转
+			// else if(last_state == STATE_RIGHT_BIG ) turn_diff = -TurnMaxAngle;//继续右转
+            turn_diff = 0;//暂时先直行
             break;
         default: // 未定义状态，直行
             turn_diff = 0;
@@ -102,11 +103,15 @@ void TrackModule_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 
     // 使能传感器引脚时钟（引脚宏在 TrackModule.h 中配置）
-    RCC_APB2PeriphClockCmd(TRACK_GPIO_CLK, ENABLE);
-    // 配置 DH1~DH4 引脚为输入下拉模式
-    GPIO_InitStructure.GPIO_Pin = TRACK_GPIO_PIN;
+    RCC_APB2PeriphClockCmd(TRACK_GPIO_CLK1 | TRACK_GPIO_CLK2, ENABLE);
+    // 配置 GPIOC 引脚（PC8/PC4/PC9）为输入下拉模式
+    GPIO_InitStructure.GPIO_Pin = TRACK_GPIO_PIN1;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; // 输入下拉模式
-    GPIO_Init(TRACK_GPIO_PORT, &GPIO_InitStructure);
+    GPIO_Init(TRACK_GPIO_PORT1, &GPIO_InitStructure);
+    // 配置 GPIOB 引脚（PB8）为输入下拉模式
+    GPIO_InitStructure.GPIO_Pin = TRACK_GPIO_PIN2;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; // 输入下拉模式
+    GPIO_Init(TRACK_GPIO_PORT2, &GPIO_InitStructure);
 }
 
 

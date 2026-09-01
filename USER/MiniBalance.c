@@ -5,7 +5,7 @@ u8 Ros_Rate = 0;                            //ROS发送数据的频率是10HZ，而中断在5
 u8 Ros_count=0,Ros_send_flag;                    //ROS模式下让ROS模式控制的更流畅的变量
 u8 Pick_up_stop=0;                          //检查是否被拿起标志位
 int Middle_angle=0;                         //机械中值默认为0
-u8 Way_Angle=2;                             //获取角度的算法，1：四元数  2：卡尔曼  3：互补滤波 
+u8 Way_Angle=1;                             //获取角度的算法，1：四元数  2：卡尔曼  3：互补滤波 
 u16 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity=2,Target_Velocity=300; //蓝牙遥控相关的变量
 float RC_Velocity,RC_Turn_Velocity;			    //遥控控制的速度
 u8 Flag_Stop=1,Flag_Show=0;                 //电机停止标志位和显示标志位  默认停止 显示打开

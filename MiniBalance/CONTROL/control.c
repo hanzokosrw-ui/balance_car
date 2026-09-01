@@ -433,7 +433,7 @@ Output  : none
 void Select_Zhongzhi(void)                   //机械中值选择，避免安装巡线装备时小车往前冲的现象
 {
 	if(Mode == IRDM_Line_Patrol_Mode)
-		Middle_angle = -6;                   //红外巡线机械中值，视安装位置调节
+		Middle_angle = -2;                   //红外巡线机械中值，视安装位置调节
 	else   Middle_angle = 1;
 }
 

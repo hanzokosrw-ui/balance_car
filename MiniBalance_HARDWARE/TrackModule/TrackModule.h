@@ -2,15 +2,19 @@
 #define __TRACKMODULE_H
 #include "sys.h"
 
-#define DH4 PAin(3)
-#define DH3 PAin(2)
-#define DH2 PAin(11)
-#define DH1 PAin(8)
+// 红外传感器引脚（从左往右：PC8、PC4、PC9、PB8；DH4=最左，DH1=最右，与驱动LEFT/RIGHT状态一致）
+#define DH1 PCin(8)
+#define DH2 PCin(4)
+#define DH3 PCin(9)
+#define DH4 PBin(8)
 
 // 红外传感器引脚配置宏（与 DH1~DH4 对应，改硬件接线时只需改这里）
-#define TRACK_GPIO_CLK      RCC_APB2Periph_GPIOA                                   // 引脚时钟
-#define TRACK_GPIO_PORT     GPIOA                                                  // 引脚端口
-#define TRACK_GPIO_PIN      (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_2 | GPIO_Pin_3)   // DH1~DH4
+#define TRACK_GPIO_CLK2     RCC_APB2Periph_GPIOC                                   // 引脚时钟1
+#define TRACK_GPIO_PORT2    GPIOC                                                  // 端口1
+#define TRACK_GPIO_PIN2     (GPIO_Pin_8 | GPIO_Pin_4 | GPIO_Pin_9)                 // PC8/PC4/PC9
+#define TRACK_GPIO_CLK1     RCC_APB2Periph_GPIOB                                   // 引脚时钟2
+#define TRACK_GPIO_PORT1    GPIOB                                                  // 端口2
+#define TRACK_GPIO_PIN1     GPIO_Pin_8                                             // PB8
 
 extern float Turn90Angle ;   // 直角弯转向角度
 extern float TurnMaxAngle;   // 大弯道转向角度
