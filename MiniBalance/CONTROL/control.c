@@ -3,14 +3,14 @@
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
 // ===== 绕障参数（模式7执行绕障；模式9巡线遇障自动交接）=====
-#define AVOID_TRIG_DIST    450          // 触发距离mm
+#define AVOID_TRIG_DIST    300          // 触发距离mm
 #define AVOID_TRIG_CNT     5            // 连续判定次数（50ms）防误触发
 #define AVOID_TURN_ANGLE   90           // 每次转弯角度（度）
 #define AVOID_GYRO_SCALE   16.4f        // 陀螺仪灵敏度 LSB/(°/s)
 #define AVOID_TURN_MAX_MS  50           // 单次转弯超时（500ms）兜底
-#define AVOID_FWD1_MM      40           // 前行1里程（mm，原100ms@300mm/s）
-#define AVOID_FWD2_MM      500          // 前行2里程（mm，须大于障碍长度+余量）
-#define AVOID_FWD3_MAX_MM  900          // 前行3找线最大里程（mm）兜底
+#define AVOID_FWD1_MM       50          // 前行1里程（mm，原100ms@300mm/s）
+#define AVOID_FWD2_MM      (AVOID_TRIG_DIST*1.2)          // 前行2里程（mm，须大于障碍长度+余量）
+#define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*2)          // 前行3找线最大里程（mm）兜底
 
 // ===== 绕障状态 =====
 #define AVOID_IDLE      0               // 正常巡线

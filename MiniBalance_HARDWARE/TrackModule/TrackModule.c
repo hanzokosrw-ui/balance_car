@@ -29,7 +29,7 @@ typedef enum {
     STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
-SensorState_t sensor_state_table[][2] = {{STATE_RIGHT_BIG,-Turn90Angle},{STATE_T,Turn90Angle},{STATE_LEFT_BIG,Turn90Angle},{STATE_T,-Turn90Angle},{STATE_T}}; // 特殊状态传感器序列
+//SensorState_t sensor_state_table[][2] = {{STATE_RIGHT_BIG,-Turn90Angle},{STATE_T,Turn90Angle},{STATE_LEFT_BIG,Turn90Angle},{STATE_T,-Turn90Angle},{STATE_T}}; // 特殊状态传感器序列
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
