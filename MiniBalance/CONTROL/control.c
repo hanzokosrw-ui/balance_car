@@ -8,9 +8,9 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 #define AVOID_TURN_ANGLE   90           // 每次转弯角度（度）
 #define AVOID_GYRO_SCALE   16.4f        // 陀螺仪灵敏度 LSB/(°/s)
 #define AVOID_TURN_MAX_MS  50           // 单次转弯超时（500ms）兜底
-#define AVOID_FWD1_MS      50           // 前行1时间（500ms）
-#define AVOID_FWD2_MS      50           // 前行2时间（500ms）
-#define AVOID_FWD3_MAX_MS  150          // 前行3找线超时（1500ms）兜底
+#define AVOID_FWD1_MM      40           // 前行1里程（mm，原100ms@300mm/s）
+#define AVOID_FWD2_MM      500          // 前行2里程（mm，须大于障碍长度+余量）
+#define AVOID_FWD3_MAX_MM  900          // 前行3找线最大里程（mm）兜底
 
 // ===== 绕障状态 =====
 #define AVOID_IDLE      0               // 正常巡线
@@ -24,8 +24,9 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
 u8  avoid_state = AVOID_IDLE;           // 当前绕障状态
 u8  avoid_cnt   = 0;                    // 连续触发计数
-u16 avoid_timer = 0;                    // 阶段计时（10ms）
+u16 avoid_timer = 0;                    // 阶段计时（10ms，转弯超时用）
 float avoid_angle = 0;                  // 转弯积分角度（度）
+float avoid_mm   = 0;                   // 前行累计里程（mm，编码器反馈）
 // Function: Control function - 所有的控制代码都在这里面
 int EXTI9_5_IRQHandler(void) 
 { 
@@ -400,7 +401,7 @@ void Avoid_State_Machine(void)
 			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 排除0/无效读数
 			{
 				if(++avoid_cnt >= AVOID_TRIG_CNT)
-				{ avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; }
+				{ avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; avoid_mm=0; }
 			}
 			else avoid_cnt=0;
 			break;
@@ -414,7 +415,7 @@ void Avoid_State_Machine(void)
 			avoid_angle += (Gyro_Turn/AVOID_GYRO_SCALE)*0.01f;          // 积分实际转角
 			if((target>0 ? avoid_angle>=target : avoid_angle<=target) || ++avoid_timer>=AVOID_TURN_MAX_MS)
 			{
-				avoid_angle=0; avoid_timer=0;
+				avoid_angle=0; avoid_timer=0; avoid_mm=0;
 				if(avoid_state==AVOID_TURN_R1)      avoid_state=AVOID_FWD1;
 				else if(avoid_state==AVOID_TURN_L1) avoid_state=AVOID_FWD2;
 				else if(avoid_state==AVOID_TURN_L2) avoid_state=AVOID_FWD3;
@@ -422,15 +423,20 @@ void Avoid_State_Machine(void)
 			}
 		}
 			break;
-		case AVOID_FWD1:                                 // 前行过障碍
-			if(++avoid_timer >= AVOID_FWD1_MS){ avoid_state=AVOID_TURN_L1; avoid_angle=0; avoid_timer=0; }
+		case AVOID_FWD1:                                 // 前行过障碍：按实际里程切下一状态
+			avoid_mm += (Velocity_Left + Velocity_Right) * 0.005f;  // 轮速均值(mm/s)×10ms→mm
+			if(avoid_mm >= AVOID_FWD1_MM)
+			{ avoid_state=AVOID_TURN_L1; avoid_angle=0; avoid_timer=0; avoid_mm=0; }
 			break;
 		case AVOID_FWD2:                                 // 前行
-			if(++avoid_timer >= AVOID_FWD2_MS){ avoid_state=AVOID_TURN_L2; avoid_angle=0; avoid_timer=0; }
+			avoid_mm += (Velocity_Left + Velocity_Right) * 0.005f;
+			if(avoid_mm >= AVOID_FWD2_MM)
+			{ avoid_state=AVOID_TURN_L2; avoid_angle=0; avoid_timer=0; avoid_mm=0; }
 			break;
-		case AVOID_FWD3:                                 // 前行直到找到线（或超时兜底）
-			if(IRDM_Line_Seen() || ++avoid_timer >= AVOID_FWD3_MAX_MS)
-			{ avoid_state=AVOID_TURN_R2; avoid_angle=0; avoid_timer=0; }
+		case AVOID_FWD3:                                 // 前行直到找到线（或里程兜底）
+			avoid_mm += (Velocity_Left + Velocity_Right) * 0.005f;
+			if(IRDM_Line_Seen() || avoid_mm >= AVOID_FWD3_MAX_MM)
+			{ avoid_state=AVOID_TURN_R2; avoid_angle=0; avoid_timer=0; avoid_mm=0; }
 			break;
 	}
 }

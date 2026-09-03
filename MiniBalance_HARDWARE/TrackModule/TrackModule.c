@@ -2,6 +2,7 @@
 #include "control.h"
 // ===== 可调参数区域 =====
 // 转向角度参数
+
 float Turn90Angle  = 80;   // 直角弯转向参数
 float TurnMaxAngle = 65;   // 大弯道转向参数
 float TurnMidAngle = 40;   // 中等转向参数（丢线时使用）
@@ -11,7 +12,7 @@ float BaseSpeed = 300;      // 基础巡线速度（直行时的速度）
 float ForwardLimit = 400;		//前行限制(转向大于该值限制其前进)
 // ===== 传感器状态定义--识别到黑线时为1 =====
 typedef enum {
-    STATE_END         = 0,    // 0000 - 十字路口
+    STATE_T         = 0,    // 0000 - T字路口
     STATE_LEFT_90_A     = 1,    // 0001 - 左直角
     STATE_LEFT_INNER    = 2,    // 0010 - 仅左内传感器（偏左微调）
     
@@ -28,7 +29,7 @@ typedef enum {
     STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
-
+SensorState_t sensor_state_table[16] = {STATE_RIGHT_BIG,STATE_LEFT_BIG,STATE_LEFT_BIG,STATE_RIGHT_BIG,STATE_T}; // 特殊状态传感器序列
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
@@ -42,9 +43,9 @@ void IRDM_line_inspection(void)
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
-       case STATE_END:// 终点停车：直接切回普通模式
+       case STATE_T:// T字路口：右转
 			turn_diff = 0;
-			//Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
+			Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
