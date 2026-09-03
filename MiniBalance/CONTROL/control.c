@@ -2,7 +2,7 @@
 #include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
-// ===== 绕障参数（巡线模式下超声波避障）=====
+// ===== 绕障参数（模式7执行绕障；模式9巡线遇障自动交接）=====
 #define AVOID_TRIG_DIST    450          // 触发距离mm
 #define AVOID_TRIG_CNT     5            // 连续判定次数（50ms）防误触发
 #define AVOID_TURN_ANGLE   90           // 每次转弯角度（度）
@@ -27,6 +27,7 @@ u8  avoid_cnt   = 0;                    // 连续触发计数
 u16 avoid_timer = 0;                    // 阶段计时（10ms，转弯超时用）
 float avoid_angle = 0;                  // 转弯积分角度（度）
 float avoid_mm   = 0;                   // 前行累计里程（mm，编码器反馈）
+u8   avoid_ret   = 0;                   // 绕障来源：1=巡线交接（绕完回巡线），0=独立模式7
 // Function: Control function - 所有的控制代码都在这里面
 int EXTI9_5_IRQHandler(void) 
 { 
@@ -65,19 +66,15 @@ int EXTI9_5_IRQHandler(void)
 	       Read_Distane();                                  //超声波读取距离   
 		Select_Zhongzhi();                                  //机械中值选择
 		IRDM_Mode();                                        //红外循迹模式
-		if(Mode == IRDM_Line_Patrol_Mode)  Avoid_State_Machine();   //绕障状态机（巡线时检测障碍）
-		else { avoid_state = AVOID_IDLE; avoid_cnt = 0; }          //退出巡线复位
+		if(Mode==Ultrasonic_Avoid_Mode || Mode==IRDM_Line_Patrol_Mode)  Avoid_State_Machine();  //模式7绕障宿主/模式9巡线，均推进绕障状态机
+		else { avoid_state = AVOID_IDLE; avoid_cnt = 0; avoid_ret = 0; }                       //其他模式复位
 		if(Mode==Normal_Mode)	Led_Flash(100);             //LED闪烁;常规模式 1s改变一次指示灯的状态	
 		else Led_Flash(0);                                  //LED常亮;其余模式
 		Balance_Pwm=Balance(Angle_Balance,Gyro_Balance);    //平衡PID控制 Gyro_Balance平衡角速度极性：前倾为正，后倾为负
 		Velocity_Pwm=Velocity(Encoder_Left,Encoder_Right);  //速度环PID控制	记住，速度反馈是正反馈，就是小车快的时候要慢下来就需要再跑快一点
-		if(Mode ==IRDM_Line_Patrol_Mode)                    //红外循迹下的转向环控制
-		{
-			if(avoid_state != AVOID_IDLE)  Turn_Pwm = Avoid_Turn();       //绕障：定角转向
-			else                           Turn_Pwm = IRDM_turn(turn_diff,Gyro_Turn);
-		}
-		else
-		  Turn_Pwm=Turn(Gyro_Turn);														//转向环PID控制     
+		if(avoid_state != AVOID_IDLE)  Turn_Pwm = Avoid_Turn();                     //绕障中：定角转向（模式7/9通用）
+		else if(Mode ==IRDM_Line_Patrol_Mode)  Turn_Pwm = IRDM_turn(turn_diff,Gyro_Turn);  //巡线转向
+		else  Turn_Pwm = Turn(Gyro_Turn);                                           //其余（含模式7待机）：遥控转向
 
 		Motor_Left=Balance_Pwm+Velocity_Pwm+Turn_Pwm;         //计算左轮电机最终PWM
 		Motor_Right=Balance_Pwm+Velocity_Pwm-Turn_Pwm;        //计算右轮电机最终PWM
@@ -123,10 +120,9 @@ int Velocity(int encoder_left,int encoder_right)
 			 Movement=Target_Velocity/Perimeter/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision*2;
 		if(Mode==Ultrasonic_Follow_Mode&&Distance<200&&Flag_Left!=1&&Flag_Right!=1) 
 			 Movement=-Target_Velocity/Perimeter/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision*2;
-		if(Mode==Ultrasonic_Avoid_Mode&&Distance<450&&Flag_Left!=1&&Flag_Right!=1)  //超声波避障
-			 Movement=-Target_Velocity/Perimeter/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision*2;
+		//（模式7旧“倒车避障”已删：模式7现为绕障宿主，倒车会抵消触发计数，由绕障状态机接管）
 		
-		//===========绕障（巡线模式下）：转弯阶段停车，前行阶段前进===========//
+		//===========绕障：转弯阶段停车，前行阶段前进===========//
 		if(avoid_state != AVOID_IDLE)
 		{
 			if(avoid_state==AVOID_FWD1||avoid_state==AVOID_FWD2||avoid_state==AVOID_FWD3)
@@ -356,8 +352,8 @@ void Get_Velocity_Form_Encoder(int encoder_left,int encoder_right)
 // Function: Select_Zhongzhi - 小车机械中值的选择
 void Select_Zhongzhi(void)                   //机械中值选择，避免安装巡线装备时小车往前冲的现象
 {
-	if(Mode == IRDM_Line_Patrol_Mode)
-		Middle_angle = -2;                   //红外巡线机械中值，视安装位置调节
+	if(Mode == IRDM_Line_Patrol_Mode || (Mode==Ultrasonic_Avoid_Mode && avoid_state != AVOID_IDLE))
+		Middle_angle = -2;                   //巡线/绕障同用巡线机械中值，避免9→7交接时平衡突变
 	else   Middle_angle = 1;
 }
 
@@ -392,16 +388,20 @@ int Avoid_Turn(void)
 	return 0;
 }
 
-// ===== 绕障状态机（10ms调用一次，仅巡线模式）=====
+// ===== 绕障状态机（10ms调用一次；模式7执行，模式9自动交接/回巡线）=====
 void Avoid_State_Machine(void)
 {
 	switch(avoid_state)
 	{
-		case AVOID_IDLE:                                 // 正常巡线：连续N次测到障碍才触发
+		case AVOID_IDLE:                                 // 待机：连续N次测到障碍才触发绕障
 			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 排除0/无效读数
 			{
 				if(++avoid_cnt >= AVOID_TRIG_CNT)
-				{ avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; avoid_mm=0; }
+				{
+					avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; avoid_mm=0;
+					if(Mode==IRDM_Line_Patrol_Mode){ Mode=Ultrasonic_Avoid_Mode; avoid_ret=1; }  //巡线遇障→借道模式7，绕完回巡线
+					else avoid_ret=0;                                                              //独立模式7：绕完停在模式7
+				}
 			}
 			else avoid_cnt=0;
 			break;
@@ -419,7 +419,9 @@ void Avoid_State_Machine(void)
 				if(avoid_state==AVOID_TURN_R1)      avoid_state=AVOID_FWD1;
 				else if(avoid_state==AVOID_TURN_L1) avoid_state=AVOID_FWD2;
 				else if(avoid_state==AVOID_TURN_L2) avoid_state=AVOID_FWD3;
-				else                               { avoid_state=AVOID_IDLE; avoid_cnt=0; }  // 回巡线
+				else { avoid_state=AVOID_IDLE; avoid_cnt=0;                                     // 绕障完成
+					   if(Mode==Ultrasonic_Avoid_Mode && avoid_ret) Mode=IRDM_Line_Patrol_Mode;   // 巡线交接→回巡线
+					   avoid_ret=0; }
 			}
 		}
 			break;

@@ -29,7 +29,7 @@ typedef enum {
     STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
-SensorState_t sensor_state_table[16] = {STATE_RIGHT_BIG,STATE_LEFT_BIG,STATE_LEFT_BIG,STATE_RIGHT_BIG,STATE_T}; // 特殊状态传感器序列
+SensorState_t sensor_state_table[][2] = {{STATE_RIGHT_BIG,-Turn90Angle},{STATE_T,Turn90Angle},{STATE_LEFT_BIG,Turn90Angle},{STATE_T,-Turn90Angle},{STATE_T}}; // 特殊状态传感器序列
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
@@ -127,11 +127,8 @@ void TrackModule_Init(void)
 u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
 {
 	int s = (DH1<<3)|(DH2<<2)|(DH3<<1)|DH4;
-	return (s != STATE_LOST && s != STATE_END);
+	return (s != STATE_LOST && s != STATE_T);   // STATE_END已改名STATE_T(=0全白)；全黑15也不认作“线”
 }
-
-
-
 
 
 
