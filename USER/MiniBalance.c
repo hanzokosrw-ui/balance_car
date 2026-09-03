@@ -32,8 +32,12 @@ int main(void)
 	KEY_Init();                     //按键初始化
 	BEEP_GPIO_Config();             //蜂鸣器初始化
 	MiniBalance_PWM_Init(7199,0);   //初始化PWM 10KHZ与电机硬件接口，用于驱动电机
+<<<<<<< HEAD
 	TeachRemote_Init();             // 示教缓冲区在串口中断使能前初始化
 	uart_init(115200);	            //串口1初始化
+=======
+	uart_init(115200);	            //串口2初始化
+>>>>>>> lqs_once
 	uart3_init(9600);             	//串口3初始化，用于蓝牙模块
 	Encoder_Init_TIM8();            //初始化编码器8
 	Encoder_Init_TIM4();            //初始化编码器4
@@ -52,7 +56,7 @@ int main(void)
 		if(Ros_send_flag==1)		
 	    {
 			data_transition();
-			USART1_SEND();                                    //给ros端发送数据 50ms一次·
+			USART2_SEND();                                    //给ros端发送数据 50ms一次·
 			Ros_send_flag=0;
 	    }
         delay_flag=1;		

@@ -33,14 +33,14 @@ int fputc(int ch, FILE *f)
 	}
 	else
 	{	
-		while((USART1->SR&0X40)==0);//Flag_Show!=0  使用串口1   
-		USART1->DR = (u8) ch;      
+		while((USART2->SR&0X40)==0);//Flag_Show!=0  使用串口2   
+		USART2->DR = (u8) ch;      
 	}	
 	return ch;
 }
 #endif 
 
-// Function: Serial port 1 initialization - 串口1初始化
+// Function: Serial port 2 initialization - 串口2初始化
 void uart_init(u32 bound)
 {
   //GPIO端口设置
@@ -48,22 +48,23 @@ void uart_init(u32 bound)
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);	//使能USART2时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//使能GPIOA时钟
   
-	//USART1_TX   GPIOA.9
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; //PA.9
+	//USART2_TX   GPIOA.2
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; //PA.2
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	//复用推挽输出
-  GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.9
+  GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.2
    
-  //USART1_RX	  GPIOA.10初始化
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;//PA10
+  //USART2_RX	  GPIOA.3初始化
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;//PA3
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//浮空输入
-  GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.10  
+  GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA.3  
    //USART 初始化设置
 
-	//Usart1 NVIC 配置
-  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	//Usart2 NVIC 配置
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1 ;//抢占优先级3
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		//子优先级3
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
@@ -77,18 +78,19 @@ void uart_init(u32 bound)
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 
-  USART_Init(USART1, &USART_InitStructure); //初始化串口1
-  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//开启串口接收中断
-  USART_Cmd(USART1, ENABLE);                    //使能串口1 
+  USART_Init(USART2, &USART_InitStructure); //初始化串口2
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//开启串口接收中断
+  USART_Cmd(USART2, ENABLE);                    //使能串口2 
 }
 
-// Function: Serial port 1 receivees interrupted - 串口一中断
-void USART1_IRQHandler(void)
+// Function: Serial port 2 receivees interrupted - 串口二中断
+void USART2_IRQHandler(void)
 {
 	static u8 Count=0;
 	u8 Usart_Receive;
-	if(USART_GetITStatus(USART1,USART_IT_RXNE)!= RESET)//cheak if data is receives 判断是否接收到数据
+	if(USART_GetITStatus(USART2,USART_IT_RXNE)!= RESET)//cheak if data is receives 判断是否接收到数据
 	{
+<<<<<<< HEAD
 		USART_ClearITPendingBit(USART1,USART_IT_RXNE);
 		Usart_Receive = USART_ReceiveData(USART1);//Read Data 读数据
 		if(TeachRemote_IsActive()) // 示教期间禁止ROS抢占控制权
@@ -96,6 +98,10 @@ void USART1_IRQHandler(void)
 			Count=0;
 			return;
 		}
+=======
+		USART_ClearITPendingBit(USART2,USART_IT_RXNE);
+		Usart_Receive = USART_ReceiveData(USART2);//Read Data 读数据
+>>>>>>> lqs_once
 		Mode=ROS_Mode;//ros控制时，将小车模式设为ROS模式
 //		if(Time_count < CONTROL_DELAY)
 //		{
@@ -219,21 +225,21 @@ float XYZ_Target_Speed_transition(u8 High,u8 Low)
 	return transition; 
 								
 }
-// Function: Serial port 1 sends data - 串口1发送数据
-void usart1_send(u8 data)
+// Function: Serial port 2 sends data - 串口2发送数据
+void usart2_send(u8 data)
 {
-	USART1->DR = data;
-	while((USART1->SR&0x40)==0);	
+	USART2->DR = data;
+	while((USART2->SR&0x40)==0);	
 }
 
-// Function: Serial port 1 sends data - 串口1发送数据
-void USART1_SEND(void)
+// Function: Serial port 2 sends data - 串口2发送数据
+void USART2_SEND(void)
 {
   unsigned char i = 0;	
 	
 	for(i=0; i<24; i++)
 	{
-		usart1_send(Send_Data.buffer[i]);
+		usart2_send(Send_Data.buffer[i]);
 	}	 
 }
 

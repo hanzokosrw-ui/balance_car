@@ -50,9 +50,9 @@ typedef struct _RECEIVE_DATA_
 
 void uart_init(u32 bound);
 u8 Check_Sum(unsigned char Count_Number,unsigned char Mode);
-void usart1_send(u8 data);
+void usart2_send(u8 data);
 float XYZ_Target_Speed_transition(u8 High,u8 Low);
-void USART1_SEND(void);
+void USART2_SEND(void);
 void data_transition(void);
 #endif
 
