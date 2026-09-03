@@ -29,7 +29,7 @@ typedef enum {
     STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
-// ===== 特殊状态序列：全4路特殊态按序匹配（直角弯/停车）；内两路只巡线 =====
+// ===== 特殊状态序列：全4路特殊态按序匹配（直角弯/停车） =====
 typedef struct {
     u8    state;   // 期待匹配的全4位传感器状态（黑=1）
     int   dir;     // 转向方向：-1=右转 0=不转 +1=左转；幅度固定用 Turn90Angle（运行时可调）
@@ -44,7 +44,7 @@ SeqStep_t sensor_state_table[] = {                 // 赛道顺序，实测后按需修改
     {STATE_T,          0, 1},   // 命中 T(0000)   → 终点停车(切普通模式)
 };
 #define SEQ_STEP_NUM   (sizeof(sensor_state_table)/sizeof(SeqStep_t))
-#define SEQ_TURN_TICKS 30           // 命中后原地转向时长：50×10ms=500ms（按需标定）
+#define SEQ_TURN_TICKS 50           // 命中后原地转向时长：50×10ms=500ms（按需标定）
 
 static u8    seq_step = 0;      // 当前期待步索引
 static u8    seq_turn = 0;      // 1=原地转向窗口（转向期间忽略其他状态）
@@ -53,35 +53,78 @@ static float seq_turn_val = 0;  // 原地转向差速值
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
-// ===== 巡线功能函数（仅内两路 DH2/DH3 巡线；外两路/大片特殊态由特殊状态机处理） =====
+// ===== 巡线功能函数（四路全状态巡线，与旧版一致；特殊大片态由特殊状态机按序处理） =====
 void IRDM_line_inspection(void)
 {
-    static int last_turn = 0;               // 两内都离线时沿用上次转向
+    static int last_state = 0;// 记录上一次的状态
 
-    // 只取内两路：DH2=右内(bit1)，DH3=左内(bit0) → inner: 3=都在线 2=仅DH2 1=仅DH3 0=都离线
-    int inner = ((DH2?1:0)<<1) | (DH3?1:0);
-
-    switch(inner)
+    // 读取传感器状态：4个传感器组合值
+    int sensor_state = (DH1 << 3) | (DH2 << 2) | (DH3 << 1) | DH4;
+        // ===== 状态判断：设置转向差速 =====
+    switch (sensor_state)
     {
-        case 3:                             // 内两路都在线上：居中直行
-            turn_diff = 0;
+       case STATE_T:// T字路口/全白：不自行停车（停车由特殊状态机终点步负责）
+			turn_diff = 0;
+			//Mode = Normal_Mode;		//（去注释会让首次见0000即停车，绕过特殊序列判定）
             break;
-        case 2:                             // 仅DH2(右内)见线 → 车偏左 → 右微调
-            turn_diff = -TurnMinAngle;
-            break;
-        case 1:                             // 仅DH3(左内)见线 → 车偏右 → 左微调
+        case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
             break;
-        default:                            // 0: 两内都离线（丢线/弯内/特殊段）→ 沿用上次转向
-            turn_diff = last_turn;
+        case STATE_RIGHT_INNER: // 仅右内传感器，偏右微调
+            turn_diff = -TurnMinAngle;
+            break;
+        case STATE_STRAIGHT_MID: // 内侧两传感器对称，直行
+            turn_diff = 0;
+            break;
+        case STATE_DIAG_RIGHT: // DH1+DH3 对角偏右
+            turn_diff = -TurnMinAngle;
+            break;
+        case STATE_LEFT_90_A: // 左直角弯
+		case STATE_LEFT_90_B: // 左直角弯
+            turn_diff = Turn90Angle;
+            break;
+        case STATE_RIGHT_90_A: // 右直角弯
+		case STATE_RIGHT_90_B: // 右直角弯
+            turn_diff = -Turn90Angle;
+            break;
+        case STATE_LEFT_BIG://左大弯
+            turn_diff = TurnMaxAngle;
+            break;
+        case STATE_RIGHT_BIG://右大弯
+            turn_diff = -TurnMaxAngle;
+            break;
+        case STATE_LEFT_SMALL://左微调
+            turn_diff = TurnMinAngle;
+            break;
+        case STATE_RIGHT_SMALL://右微调
+            turn_diff = -TurnMinAngle;
+            break;
+        case STATE_STRAIGHT://直行
+            turn_diff = 0;
+            break;
+        case STATE_LOST://丢线处理
+            // if (last_state == STATE_LEFT_SMALL) turn_diff = TurnMidAngle;//继续左转
+			// else if (last_state == STATE_RIGHT_SMALL) turn_diff = -TurnMidAngle;//继续右转
+			// else if(last_state == STATE_LEFT_BIG ) turn_diff = TurnMaxAngle;//继续左转
+			// else if(last_state == STATE_RIGHT_BIG ) turn_diff = -TurnMaxAngle;//继续右转
+            turn_diff = last_state;
+            break;
+        default: // 未定义状态，直行
+            turn_diff = 0;
             break;
     }
-    if(inner != 0) last_turn = turn_diff;   // 只保存有效巡线转向
-
-    // 转向速度越大，基础速度越低
-    if(fabs(turn_diff)<ForwardLimit)
-        base_speed_mm = BaseSpeed - (BaseSpeed * (fabs(turn_diff) / ForwardLimit));
-    else base_speed_mm = 0;
+	//保存传感器状态
+	if(sensor_state!=STATE_LOST)
+	{
+		last_state=turn_diff;
+	}
+	// 转向速度越大，基础速度越低
+	if(fabs(turn_diff)<ForwardLimit)
+	{
+		base_speed_mm = BaseSpeed - (BaseSpeed * (fabs(turn_diff) / ForwardLimit));
+	}
+	else base_speed_mm=0;
+        // ===== Output: base_speed_mm(line speed) & turn_diff(turn differential) =====
 }
 
 void TrackModule_Init(void)
