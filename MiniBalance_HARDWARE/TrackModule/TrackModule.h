@@ -30,5 +30,18 @@ void TrackModule_Init(void);
 void IRDM_line_inspection(void);
 u8 IRDM_Line_Seen(void);   // 1=检测到线（绕障后找线用）
 u8 EightTrack_IsIdle(void); // 1=特殊路况状态机空闲（避障触发互斥用）
+
+typedef enum {
+    EIGHT_TRACK_IDLE = 0,
+    EIGHT_TRACK_FIRST_TURN_RIGHT,
+    EIGHT_TRACK_FIRST_WAIT_END,
+    EIGHT_TRACK_FIRST_TURN_LEFT,
+    EIGHT_TRACK_WAIT_LEFT_ANGLE,
+    EIGHT_TRACK_SECOND_TURN_LEFT,
+    EIGHT_TRACK_SECOND_WAIT_END,
+    EIGHT_TRACK_SECOND_TURN_RIGHT
+} EightTrackState_t;
+
+extern EightTrackState_t eight_track_state; // 当前状态机阶段（OLED诊断显示用）
 #endif
 

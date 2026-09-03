@@ -2,7 +2,6 @@
 #include "control.h"
 // ===== 可调参数区域 =====
 // 转向角度参数
-
 float Turn90Angle  = 80;   // 直角弯转向参数
 float TurnMaxAngle = 65;   // 大弯道转向参数
 float TurnMidAngle = 40;   // 中等转向参数（丢线时使用）
@@ -12,7 +11,7 @@ float BaseSpeed = 300;      // 基础巡线速度（直行时的速度）
 float ForwardLimit = 400;		//前行限制(转向大于该值限制其前进)
 // ===== 传感器状态定义--识别到黑线时为1 =====
 typedef enum {
-    STATE_T         = 0,    // 0000 - T字路口
+    STATE_END         = 0,    // 0000 - 十字路口
     STATE_LEFT_90_A     = 1,    // 0001 - 左直角
     STATE_LEFT_INNER    = 2,    // 0010 - 仅左内传感器（偏左微调）
     
@@ -29,24 +28,13 @@ typedef enum {
     STATE_RIGHT_BIG     = 14,   // 1110 - 右大弯
     STATE_LOST          = 15    // 1111 - 丢线
 } SensorState_t;
-//SensorState_t sensor_state_table[][2] = {{STATE_RIGHT_BIG,-Turn90Angle},{STATE_T,Turn90Angle},{STATE_LEFT_BIG,Turn90Angle},{STATE_T,-Turn90Angle},{STATE_T}}; // 特殊状态传感器序列
+
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
 #define TIMED_TURN_TICKS 30u  /* 可调：每个计数周期为10 ms */
 
-typedef enum {
-    EIGHT_TRACK_IDLE = 0,
-    EIGHT_TRACK_FIRST_TURN_RIGHT,
-    EIGHT_TRACK_FIRST_WAIT_END,
-    EIGHT_TRACK_FIRST_TURN_LEFT,
-    EIGHT_TRACK_WAIT_LEFT_ANGLE,
-    EIGHT_TRACK_SECOND_TURN_LEFT,
-    EIGHT_TRACK_SECOND_WAIT_END,
-    EIGHT_TRACK_SECOND_TURN_RIGHT
-} EightTrackState_t;
-
-static EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
+EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
 static u16 timed_turn_timer = 0;
 static u8 eight_track_segment_flag = 0; /* 0=未执行，1=第一段完成，2=两段完成 */
 
@@ -79,7 +67,7 @@ void IRDM_line_inspection(void)
     }
     else if (eight_track_state == EIGHT_TRACK_FIRST_WAIT_END)
     {
-        if (sensor_state == STATE_T)
+        if (sensor_state == STATE_END)
         {
             eight_track_state = EIGHT_TRACK_FIRST_TURN_LEFT;
             timed_turn_timer = 0;
@@ -118,7 +106,7 @@ void IRDM_line_inspection(void)
     }
     else if (eight_track_state == EIGHT_TRACK_SECOND_WAIT_END)
     {
-        if (sensor_state == STATE_T)
+        if (sensor_state == STATE_END)
         {
             eight_track_state = EIGHT_TRACK_SECOND_TURN_RIGHT;
             timed_turn_timer = 0;
@@ -139,9 +127,10 @@ void IRDM_line_inspection(void)
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
-       case STATE_T:// T字路口：右转
+       case STATE_END:// 终点停车：直接切回普通模式
 			turn_diff = 0;
-			//Mode = Normal_Mode;		//切到普通模式后巡线不再运行，小车原地平衡即停车
+			if(eight_track_state == EIGHT_TRACK_IDLE && timed_turn_diff == 0)
+				Mode = Normal_Mode;		//状态机外检测到0000，退出巡线并停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
@@ -205,7 +194,7 @@ void IRDM_line_inspection(void)
 		turn_diff = timed_turn_diff;
 		base_speed_mm = 0;
 	}
-	else if(sensor_state == STATE_T && eight_track_state == EIGHT_TRACK_IDLE)
+	else if(sensor_state == STATE_END && eight_track_state == EIGHT_TRACK_IDLE)
 	{
 		base_speed_mm = 0;
 	}
@@ -236,7 +225,7 @@ void TrackModule_Init(void)
 u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
 {
 	int s = (DH1<<3)|(DH2<<2)|(DH3<<1)|DH4;
-	return (s != STATE_LOST && s != STATE_T);   // STATE_END已改名STATE_T(=0全白)；全黑15也不认作“线”
+	return (s != STATE_LOST && s != STATE_END);
 }
 
 // Function: EightTrack_IsIdle - 特殊路况（8字轨道）状态机是否空闲（避障触发互斥用）
@@ -244,6 +233,8 @@ u8 EightTrack_IsIdle(void)
 {
 	return eight_track_state == EIGHT_TRACK_IDLE;
 }
+
+/* by codex */
 
 
 

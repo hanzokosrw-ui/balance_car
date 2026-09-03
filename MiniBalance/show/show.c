@@ -36,6 +36,8 @@ void oled_show(void)
 		case 4: case 8: case 10: case 12: case 13: case 14:	OLED_ShowString(66,16,"R"); break;	// 偏右
 		default:							OLED_ShowString(66,16,"-"); break;	// 十字/丢线
 	}
+	OLED_ShowString(74,16,"E:");				// 8字状态机阶段（0~7）
+	OLED_ShowNumber(88,16,(u32)eight_track_state,1,12);
 	
 	//===========第三行：模式 M 巡线速度 V 转向差速 D==========//
 	OLED_ShowString(0,32,"M:");
