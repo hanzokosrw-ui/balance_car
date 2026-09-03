@@ -25,19 +25,12 @@ void Mode_Choose(void)
 			//8.超声波跟随模式
 			//9.红外循迹模式
 			case Click:
-				Mode++;
-				if(Mode == 1)							//跳过已删除的 1~5 号模式，直接切到 ROS 模式
-				{
-					Mode = ROS_Mode;
-				}
-				else if(Mode == IRDM_Line_Patrol_Mode)	//红外循迹模式
-				{
-					TrackModule_Init();					//初始化红外循迹引脚
-				}
-				else if(Mode == 10)						//模式循环切换
-				{
-					Mode = Normal_Mode;
-				}
+				if(Mode >= IRDM_Line_Patrol_Mode)
+					TeachRemote_SetMode(Normal_Mode); // 保存记录/终止播放，按键不进入10、11
+				else if(Mode == Normal_Mode)
+					TeachRemote_SetMode(ROS_Mode);
+				else
+					TeachRemote_SetMode(Mode + 1);
 				break;
 			default:break;
 		}
@@ -126,3 +119,4 @@ uint8_t User_Key_Scan(void)
 	}
 	return No_Action;							//无动作
 }
+/* by codex */

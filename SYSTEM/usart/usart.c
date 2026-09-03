@@ -91,6 +91,11 @@ void USART1_IRQHandler(void)
 	{
 		USART_ClearITPendingBit(USART1,USART_IT_RXNE);
 		Usart_Receive = USART_ReceiveData(USART1);//Read Data 读数据
+		if(TeachRemote_IsActive()) // 示教期间禁止ROS抢占控制权
+		{
+			Count=0;
+			return;
+		}
 		Mode=ROS_Mode;//ros控制时，将小车模式设为ROS模式
 //		if(Time_count < CONTROL_DELAY)
 //		{
@@ -254,3 +259,4 @@ u8 Check_Sum(unsigned char Count_Number,unsigned char mode)
 	}
 	return check_sum;
 }
+/* by codex */

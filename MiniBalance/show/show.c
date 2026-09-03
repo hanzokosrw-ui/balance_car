@@ -39,7 +39,7 @@ void oled_show(void)
 	
 	//===========第三行：模式 M 巡线速度 V 转向差速 D==========//
 	OLED_ShowString(0,32,"M:");
-	OLED_ShowNumber(16,32,Mode,1,12);
+	OLED_ShowNumber(14,32,Mode,2,12); // 示教模式10/11需要两位显示
 	OLED_ShowString(26,32,"V:");
 	if(Move_X<0)			OLED_ShowString(40,32,"-");
 	else					OLED_ShowString(40,32,"+");
@@ -55,7 +55,9 @@ void oled_show(void)
 		case Ultrasonic_Avoid_Mode:		OLED_ShowString(100,32,"AVD"); break;	// 避障
 		case Ultrasonic_Follow_Mode:	OLED_ShowString(100,32,"FLW"); break;	// 跟随
 		case IRDM_Line_Patrol_Mode:		OLED_ShowString(100,32,"TRK"); break;	// 巡线
-		default:						OLED_ShowNumber(100,32,Mode,1,12); break;
+		case Teach_Record_Mode:         OLED_ShowString(100,32,"REC"); break;
+		case Teach_Play_Mode:           OLED_ShowString(100,32,"PLY"); break;
+		default:						OLED_ShowNumber(100,32,Mode,2,12); break;
 	}
 
 	//===========第四行：左右电机 PWM L/R=====================//
@@ -95,6 +97,8 @@ void APP_Show(void)
 	   printf("{B%d:%d:%d}$",(int)Gyro_Balance,(int)Gyro_Balance,(int)Gyro_Balance); //x，y，z轴角度 在APP上面显示波形
 																													//可按格式自行增加显示波形，最多可显示五个
 }
+
+/* by codex */
 
 
 

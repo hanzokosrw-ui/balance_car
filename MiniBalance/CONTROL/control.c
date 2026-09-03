@@ -60,6 +60,7 @@ int EXTI9_5_IRQHandler(void)
 			if(Voltage_Count==100) Voltage=Voltage_All/100,Voltage_All=0,Voltage_Count=0;//求平均值		
 			return 0;	                                               
 		}                                         					//10ms控制一次
+		TeachRemote_Tick(Turn_Off(Angle_Balance,Voltage)==0); // 10ms记录/回放，不阻塞平衡环
 		if(Mode==Ultrasonic_Avoid_Mode||Mode==Ultrasonic_Follow_Mode||Mode==IRDM_Line_Patrol_Mode)		
 	       Read_Distane();                                  //超声波读取距离   
 		Select_Zhongzhi();                                  //机械中值选择
@@ -90,6 +91,8 @@ int EXTI9_5_IRQHandler(void)
 			Pick_up_stop=0;	                   		              //如果被放下就启动电机
 		if(Turn_Off(Angle_Balance,Voltage)==0)     					  //如果不存在异常
 			Set_Pwm(Motor_Left,Motor_Right);         					  //赋值给PWM寄存器  
+		else
+			TeachRemote_SafetyStop(); // 提起/倾倒等保护触发时终止示教
 	 }       	
 	 return 0;	  
 } 
@@ -434,6 +437,8 @@ void Avoid_State_Machine(void)
 			break;
 	}
 }
+
+/* by codex */
 
 
 
