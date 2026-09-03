@@ -66,8 +66,19 @@ int EXTI9_5_IRQHandler(void)
 	       Read_Distane();                                  //超声波读取距离   
 		Select_Zhongzhi();                                  //机械中值选择
 		IRDM_Mode();                                        //红外循迹模式
-		if(Mode==Ultrasonic_Avoid_Mode || Mode==IRDM_Line_Patrol_Mode)  Avoid_State_Machine();  //模式7绕障宿主/模式9巡线，均推进绕障状态机
-		else { avoid_state = AVOID_IDLE; avoid_cnt = 0; avoid_ret = 0; }                       //其他模式复位
+		if(Mode==Ultrasonic_Avoid_Mode || Mode==IRDM_Line_Patrol_Mode)
+		{
+			Avoid_State_Machine();                                            //绕障状态机（模式7执行/模式9自动交接）
+			if(Mode==Ultrasonic_Avoid_Mode && avoid_ret==0)  Special_Seq_Reset();   //手动进模式7→特殊序列从头
+			if(Mode==IRDM_Line_Patrol_Mode && avoid_state==AVOID_IDLE &&
+			   Flag_Left!=1 && Flag_Right!=1)
+				Special_Seq_Step();                                           //特殊状态按序匹配（内两路巡线+全4路特殊态）
+		}
+		else
+		{
+			avoid_state = AVOID_IDLE; avoid_cnt = 0; avoid_ret = 0;
+			Special_Seq_Reset();                                              //手动退出巡线→特殊序列从头
+		}
 		if(Mode==Normal_Mode)	Led_Flash(100);             //LED闪烁;常规模式 1s改变一次指示灯的状态	
 		else Led_Flash(0);                                  //LED常亮;其余模式
 		Balance_Pwm=Balance(Angle_Balance,Gyro_Balance);    //平衡PID控制 Gyro_Balance平衡角速度极性：前倾为正，后倾为负

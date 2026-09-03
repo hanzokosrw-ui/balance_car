@@ -29,5 +29,7 @@ extern float turn_diff ;            // 转向差速（左+右-，单位：mm/s）
 void TrackModule_Init(void);
 void IRDM_line_inspection(void);
 u8 IRDM_Line_Seen(void);   // 1=检测到线（绕障后找线用）
+void Special_Seq_Step(void);   // 特殊状态按序匹配（10ms，仅巡线非绕障时调用）
+void Special_Seq_Reset(void);  // 复位特殊序列（从头匹配）
 #endif
 
