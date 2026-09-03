@@ -2,6 +2,7 @@
 #ifndef __CONTROL_H
 #define __CONTROL_H
 #include "sys.h"
+#include "TeachRemote.h"
 
 #define PI 3.14159265							//PI圆周率
 #define Control_Frequency  200.0	//编码器读取频率
@@ -22,10 +23,13 @@
 #define Ultrasonic_Avoid_Mode               7
 #define Ultrasonic_Follow_Mode              8
 #define IRDM_Line_Patrol_Mode               9   //红外循迹模式
+#define Teach_Record_Mode                  10  // 遥控记录：R
+#define Teach_Play_Mode                    11  // 示教回放：P
 
 int EXTI9_5_IRQHandler(void);
 int Balance(float angle,float gyro);
 int Velocity(int encoder_left,int encoder_right);
+void Velocity_Request_Integral_Scale(float factor);
 int Turn(float gyro);
 void Set_Pwm(int motor_left,int motor_right);
 void Limit_Pwm(void);
@@ -45,4 +49,6 @@ void Avoid_State_Machine(void);
 extern short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 
 #endif
+
+/* by codex */
 

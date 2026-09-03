@@ -1,7 +1,6 @@
 #include "control.h"	
 #include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
- 
 // ===== 绕障参数（模式7执行绕障；模式9巡线遇障自动交接）=====
 #define AVOID_TRIG_DIST    300          // 触发距离mm
 #define AVOID_TRIG_CNT     5            // 连续判定次数（50ms）防误触发
@@ -11,6 +10,16 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 #define AVOID_FWD1_MM       50          // 前行1里程（mm，原100ms@300mm/s）
 #define AVOID_FWD2_MM      (AVOID_TRIG_DIST*1.2)          // 前行2里程（mm，须大于障碍长度+余量）
 #define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*2)          // 前行3找线最大里程（mm）兜底
+
+// ===== 特殊路况（8字轨道）定时转弯后的速度积分缩放（队友：防止转弯后猛冲）=====
+static float velocity_integral_scale_request = 1.0f;
+
+void Velocity_Request_Integral_Scale(float factor)
+{
+	if(factor < 0) factor = 0;
+	if(factor > 1) factor = 1;
+	velocity_integral_scale_request = factor;
+}
 
 // ===== 绕障状态 =====
 #define AVOID_IDLE      0               // 正常巡线
@@ -44,6 +53,7 @@ int EXTI9_5_IRQHandler(void)
 
 //																												//左轮A相接TIM4_CH1,右轮A相接TIM8_CH1,故这里两个编码器的极性不相同
 		Mode_Choose();                                      //模式的选择
+		if(Mode == ROS_Mode) TeachRemote_SetMode(Normal_Mode); //禁止任何异常路径进入ROS模式
 		Get_Velocity_Form_Encoder(Encoder_Left,Encoder_Right);//编码器读数转速度（mm/s）
 		if(delay_flag==1)
 		{
@@ -62,6 +72,7 @@ int EXTI9_5_IRQHandler(void)
 			if(Voltage_Count==100) Voltage=Voltage_All/100,Voltage_All=0,Voltage_Count=0;//求平均值		
 			return 0;	                                               
 		}                                         					//10ms控制一次
+		TeachRemote_Tick(Turn_Off(Angle_Balance,Voltage)==0); // 10ms记录/回放，不阻塞平衡环
 		if(Mode==Ultrasonic_Avoid_Mode||Mode==Ultrasonic_Follow_Mode||Mode==IRDM_Line_Patrol_Mode)		
 	       Read_Distane();                                  //超声波读取距离   
 		Select_Zhongzhi();                                  //机械中值选择
@@ -88,6 +99,8 @@ int EXTI9_5_IRQHandler(void)
 			Pick_up_stop=0;	                   		              //如果被放下就启动电机
 		if(Turn_Off(Angle_Balance,Voltage)==0)     					  //如果不存在异常
 			Set_Pwm(Motor_Left,Motor_Right);         					  //赋值给PWM寄存器  
+		else
+			TeachRemote_SafetyStop(); // 提起/倾倒等保护触发时终止示教
 	 }       	
 	 return 0;	  
 } 
@@ -137,6 +150,11 @@ int Velocity(int encoder_left,int encoder_right)
 		Encoder_bias += Encoder_Least*0.16;	                              //一阶低通滤波器，减缓速度变化 
 		Encoder_Integral +=Encoder_bias;                                  //积分出位移 积分时间：10ms
 		Encoder_Integral=Encoder_Integral+Movement;                       //接收遥控器数据，控制前进后退
+		if(velocity_integral_scale_request < 1.0f)
+		{
+			Encoder_Integral *= velocity_integral_scale_request;
+			velocity_integral_scale_request = 1.0f;
+		}
 		if(Encoder_Integral>380000)  	Encoder_Integral=380000;             //积分限幅
 		if(Encoder_Integral<-380000)	  Encoder_Integral=-380000;            //积分限幅	
 		velocity=-Encoder_bias*Velocity_Kp/100-Encoder_Integral*Velocity_Ki/100;     //速度控制
@@ -394,7 +412,7 @@ void Avoid_State_Machine(void)
 	switch(avoid_state)
 	{
 		case AVOID_IDLE:                                 // 待机：连续N次测到障碍才触发绕障
-			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 排除0/无效读数
+			if(EightTrack_IsIdle() && Distance>20 && Distance<AVOID_TRIG_DIST)   // 特殊路况(8字)处理中不触发避障，排除0/无效读数
 			{
 				if(++avoid_cnt >= AVOID_TRIG_CNT)
 				{
@@ -442,6 +460,8 @@ void Avoid_State_Machine(void)
 			break;
 	}
 }
+
+/* by codex */
 
 
 

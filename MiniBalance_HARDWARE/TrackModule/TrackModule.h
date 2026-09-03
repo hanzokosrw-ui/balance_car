@@ -29,5 +29,6 @@ extern float turn_diff ;            // 转向差速（左+右-，单位：mm/s）
 void TrackModule_Init(void);
 void IRDM_line_inspection(void);
 u8 IRDM_Line_Seen(void);   // 1=检测到线（绕障后找线用）
+u8 EightTrack_IsIdle(void); // 1=特殊路况状态机空闲（避障触发互斥用）
 #endif
 
