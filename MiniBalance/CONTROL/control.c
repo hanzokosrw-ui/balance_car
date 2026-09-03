@@ -1,7 +1,7 @@
 #include "control.h"	
 #include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
-
+ 
 // ===== 绕障参数（模式7执行绕障；模式9巡线遇障自动交接）=====
 #define AVOID_TRIG_DIST    300          // 触发距离mm
 #define AVOID_TRIG_CNT     5            // 连续判定次数（50ms）防误触发
