@@ -32,7 +32,7 @@ typedef enum {
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
-#define TIMED_TURN_TICKS 25u  /* 可调：每个计数周期为10 ms */
+#define TIMED_TURN_TICKS 30u  /* 可调：每个计数周期为10 ms */
 
 typedef enum {
     EIGHT_TRACK_IDLE = 0,
