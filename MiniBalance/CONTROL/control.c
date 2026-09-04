@@ -1,6 +1,14 @@
 #include "control.h"	
 #include "TrackModule.h"	
 short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
+static float velocity_integral_scale_request = 1.0f;
+
+void Velocity_Request_Integral_Scale(float factor)
+{
+	if(factor < 0) factor = 0;
+	if(factor > 1) factor = 1;
+	velocity_integral_scale_request = factor;
+}
 
 // ===== 绕障参数（巡线模式下超声波避障）=====
 #define AVOID_TRIG_DIST    450          // 触发距离mm
@@ -42,6 +50,7 @@ int EXTI9_5_IRQHandler(void)
 
 //																												//左轮A相接TIM4_CH1,右轮A相接TIM8_CH1,故这里两个编码器的极性不相同
 		Mode_Choose();                                      //模式的选择
+		if(Mode == ROS_Mode) TeachRemote_SetMode(Normal_Mode); //禁止任何异常路径进入ROS模式
 		Get_Velocity_Form_Encoder(Encoder_Left,Encoder_Right);//编码器读数转速度（mm/s）
 		if(delay_flag==1)
 		{
@@ -143,6 +152,11 @@ int Velocity(int encoder_left,int encoder_right)
 		Encoder_bias += Encoder_Least*0.16;	                              //一阶低通滤波器，减缓速度变化 
 		Encoder_Integral +=Encoder_bias;                                  //积分出位移 积分时间：10ms
 		Encoder_Integral=Encoder_Integral+Movement;                       //接收遥控器数据，控制前进后退
+		if(velocity_integral_scale_request < 1.0f)
+		{
+			Encoder_Integral *= velocity_integral_scale_request;
+			velocity_integral_scale_request = 1.0f;
+		}
 		if(Encoder_Integral>380000)  	Encoder_Integral=380000;             //积分限幅
 		if(Encoder_Integral<-380000)	  Encoder_Integral=-380000;            //积分限幅	
 		velocity=-Encoder_bias*Velocity_Kp/100-Encoder_Integral*Velocity_Ki/100;     //速度控制

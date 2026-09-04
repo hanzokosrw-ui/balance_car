@@ -29,6 +29,7 @@
 int EXTI9_5_IRQHandler(void);
 int Balance(float angle,float gyro);
 int Velocity(int encoder_left,int encoder_right);
+void Velocity_Request_Integral_Scale(float factor);
 int Turn(float gyro);
 void Set_Pwm(int motor_left,int motor_right);
 void Limit_Pwm(void);

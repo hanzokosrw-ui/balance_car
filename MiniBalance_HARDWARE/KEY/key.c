@@ -20,7 +20,6 @@ void Mode_Choose(void)
 		{
 			//单击按键可以切换到
 			//0.普通遥控模式
-			//6.ROS模式
 			//7.超声波避障模式
 			//8.超声波跟随模式
 			//9.红外循迹模式
@@ -28,7 +27,7 @@ void Mode_Choose(void)
 				if(Mode >= IRDM_Line_Patrol_Mode)
 					TeachRemote_SetMode(Normal_Mode); // 保存记录/终止播放，按键不进入10、11
 				else if(Mode == Normal_Mode)
-					TeachRemote_SetMode(ROS_Mode);
+					TeachRemote_SetMode(Ultrasonic_Avoid_Mode); //跳过已禁用的ROS模式
 				else
 					TeachRemote_SetMode(Mode + 1);
 				break;

@@ -38,6 +38,7 @@ uint8_t TeachRemote_IsActive(void)
 static void change_mode(uint8_t mode)
 {
     uint32_t irq_mask = __get_PRIMASK();
+    if (mode == ROS_Mode) mode = Normal_Mode;
     /* UART1 can preempt control: publish mode and clear ROS atomically. */
     __disable_irq();
     if (Mode == Teach_Record_Mode) {

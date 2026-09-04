@@ -86,45 +86,10 @@ void uart_init(u32 bound)
 // Function: Serial port 2 receivees interrupted - 串口二中断
 void USART2_IRQHandler(void)
 {
-	static u8 Count=0;
-	u8 Usart_Receive;
 	if(USART_GetITStatus(USART2,USART_IT_RXNE)!= RESET)//cheak if data is receives 判断是否接收到数据
 	{
 		USART_ClearITPendingBit(USART2,USART_IT_RXNE);
-		Usart_Receive = USART_ReceiveData(USART2);//Read Data 读数据
-		if(TeachRemote_IsActive()) // 示教期间禁止ROS抢占控制权
-		{
-			Count=0;
-			return;
-		}
-		Mode=ROS_Mode;//ros控制时，将小车模式设为ROS模式
-//		if(Time_count < CONTROL_DELAY)
-//		{
-//			//Data is not processed until 10 seconds after startup
-//			//开机十秒前不允许接收数据
-//		}
-		Receive_Data.buffer[Count] = Usart_Receive;//Fill the array with serial data  串口数据填入数组
-		
-		//Ensure that the first data is the array is FRAME_HEADER
-		//确保第一个数据时帧头
-		if(Usart_Receive == FRAME_HEADER ||Count>0)
-			Count++;
-		else Count=0;
-		if(Count == 11) //Verify the length of the packet  验证数据包的长度
-		{
-			Count = 0;
-			if(Receive_Data.buffer[10] == FRAME_TAIL)
-			{
-				if(Receive_Data.buffer[9] == Check_Sum(9,0))
-				{
-					//Calculate the 3-axis target velocity from the serial data,which is divided into 8-bit high and 8-bit low units mm/s
-					Move_X=XYZ_Target_Speed_transition(Receive_Data.buffer[3],Receive_Data.buffer[4]);//平衡小车没有运用到运动学正解逆解
-					Move_Z=-XYZ_Target_Speed_transition(Receive_Data.buffer[7],Receive_Data.buffer[8])/1000*160/2/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision/Perimeter;//Move_Z是直接作用在转向环
-					//Move_Z=ROS给的弧度/1000*轮距/2/周长/编码器读取频率*频数*减速比*精度；
-					Ros_Rate=0;  //只要中断进来，就把它置0，防止小车控制的卡顿
-				}
-			}
-		}
+		(void)USART_ReceiveData(USART2); //ROS接收已禁用，仅清空接收寄存器
 	}
 }
 

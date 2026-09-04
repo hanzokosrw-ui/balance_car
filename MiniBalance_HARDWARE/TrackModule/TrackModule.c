@@ -72,6 +72,7 @@ void IRDM_line_inspection(void)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_FIRST_WAIT_END;
+            Velocity_Request_Integral_Scale(0.3f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_FIRST_WAIT_END)
@@ -83,7 +84,10 @@ void IRDM_line_inspection(void)
     if (eight_track_state == EIGHT_TRACK_FIRST_TURN_LEFT)
     {
         if (sensor_state == STATE_LEFT_BIG || sensor_state == STATE_RIGHT_BIG)
+        {
             eight_track_state = EIGHT_TRACK_WAIT_LEFT_ANGLE;
+            Velocity_Request_Integral_Scale(0.3f);
+        }
         else
             sensor_state = STATE_LEFT_90_A;
     }
@@ -103,6 +107,7 @@ void IRDM_line_inspection(void)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_SECOND_WAIT_END;
+            Velocity_Request_Integral_Scale(0.3f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_SECOND_WAIT_END)
@@ -114,7 +119,10 @@ void IRDM_line_inspection(void)
     if (eight_track_state == EIGHT_TRACK_SECOND_TURN_RIGHT)
     {
         if (sensor_state == STATE_LEFT_BIG || sensor_state == STATE_RIGHT_BIG)
+        {
             eight_track_state = EIGHT_TRACK_IDLE;
+            Velocity_Request_Integral_Scale(0.3f);
+        }
         else
             sensor_state = STATE_RIGHT_90_A;
     }
