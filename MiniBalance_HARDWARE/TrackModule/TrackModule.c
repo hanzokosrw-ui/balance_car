@@ -32,7 +32,7 @@ typedef enum {
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
-#define TIMED_TURN_TICKS 30u  /* 可调：每个计数周期为10 ms */
+#define TIMED_TURN_TICKS 25u  /* 可调：每个计数周期为10 ms */
 
 typedef enum {
     EIGHT_TRACK_IDLE = 0,
@@ -47,6 +47,7 @@ typedef enum {
 
 static EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
 static u16 timed_turn_timer = 0;
+static u8 eight_track_segment_flag = 0; /* 0=未执行，1=第一段完成，2=两段完成 */
 
 // ===== 巡线功能函数（输出两电机目标速度） =====
 void IRDM_line_inspection(void)
@@ -58,7 +59,7 @@ void IRDM_line_inspection(void)
     int sensor_state = (DH1 << 3) | (DH2 << 2) | (DH3 << 1) | DH4;
 
     /* 第一段：1000/1100 -> 定时原地右转 -> 等待0000 -> 左转。 */
-    if (eight_track_state == EIGHT_TRACK_IDLE &&
+    if (eight_track_state == EIGHT_TRACK_IDLE && eight_track_segment_flag == 0 &&
         (sensor_state == STATE_RIGHT_90_A || sensor_state == STATE_RIGHT_90_B))
     {
         eight_track_state = EIGHT_TRACK_FIRST_TURN_RIGHT;
@@ -72,28 +73,32 @@ void IRDM_line_inspection(void)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_FIRST_WAIT_END;
-            Velocity_Request_Integral_Scale(0.3f);
+            Velocity_Request_Integral_Scale(0.2f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_FIRST_WAIT_END)
     {
         if (sensor_state == STATE_END)
+        {
             eight_track_state = EIGHT_TRACK_FIRST_TURN_LEFT;
+            timed_turn_timer = 0;
+        }
     }
 
     if (eight_track_state == EIGHT_TRACK_FIRST_TURN_LEFT)
     {
-        if (sensor_state == STATE_LEFT_BIG || sensor_state == STATE_RIGHT_BIG)
+        timed_turn_diff = 80;
+        if (++timed_turn_timer >= TIMED_TURN_TICKS)
         {
+            timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_WAIT_LEFT_ANGLE;
-            Velocity_Request_Integral_Scale(0.3f);
+            eight_track_segment_flag = 1;
+            Velocity_Request_Integral_Scale(0.2f);
         }
-        else
-            sensor_state = STATE_LEFT_90_A;
     }
 
     /* 第二段：0001/0011 -> 定时原地左转 -> 等待0000 -> 右转。 */
-    if (eight_track_state == EIGHT_TRACK_WAIT_LEFT_ANGLE &&
+    if (eight_track_state == EIGHT_TRACK_WAIT_LEFT_ANGLE && eight_track_segment_flag == 1 &&
         (sensor_state == STATE_LEFT_90_A || sensor_state == STATE_LEFT_90_B))
     {
         eight_track_state = EIGHT_TRACK_SECOND_TURN_LEFT;
@@ -107,31 +112,35 @@ void IRDM_line_inspection(void)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_SECOND_WAIT_END;
-            Velocity_Request_Integral_Scale(0.3f);
+            Velocity_Request_Integral_Scale(0.2f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_SECOND_WAIT_END)
     {
         if (sensor_state == STATE_END)
+        {
             eight_track_state = EIGHT_TRACK_SECOND_TURN_RIGHT;
+            timed_turn_timer = 0;
+        }
     }
 
     if (eight_track_state == EIGHT_TRACK_SECOND_TURN_RIGHT)
     {
-        if (sensor_state == STATE_LEFT_BIG || sensor_state == STATE_RIGHT_BIG)
+        timed_turn_diff = -80;
+        if (++timed_turn_timer >= TIMED_TURN_TICKS)
         {
+            timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_IDLE;
-            Velocity_Request_Integral_Scale(0.3f);
+            eight_track_segment_flag = 2;
+            Velocity_Request_Integral_Scale(0.2f);
         }
-        else
-            sensor_state = STATE_RIGHT_90_A;
     }
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
        case STATE_END:// 终点停车：直接切回普通模式
 			turn_diff = 0;
-			if(eight_track_state == EIGHT_TRACK_IDLE)
+			if(eight_track_state == EIGHT_TRACK_IDLE && timed_turn_diff == 0)
 				Mode = Normal_Mode;		//状态机外检测到0000，退出巡线并停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
@@ -209,6 +218,7 @@ void TrackModule_Init(void)
 
     eight_track_state = EIGHT_TRACK_IDLE;
     timed_turn_timer = 0;
+    eight_track_segment_flag = 0;
 
     // 使能传感器引脚时钟（引脚宏在 TrackModule.h 中配置）
     RCC_APB2PeriphClockCmd(TRACK_GPIO_CLK1 | TRACK_GPIO_CLK2, ENABLE);
