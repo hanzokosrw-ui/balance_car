@@ -90,18 +90,13 @@ void USART2_IRQHandler(void)
 	u8 Usart_Receive;
 	if(USART_GetITStatus(USART2,USART_IT_RXNE)!= RESET)//cheak if data is receives 判断是否接收到数据
 	{
-<<<<<<< HEAD
-		USART_ClearITPendingBit(USART1,USART_IT_RXNE);
-		Usart_Receive = USART_ReceiveData(USART1);//Read Data 读数据
+		USART_ClearITPendingBit(USART2,USART_IT_RXNE);
+		Usart_Receive = USART_ReceiveData(USART2);//Read Data 读数据
 		if(TeachRemote_IsActive()) // 示教期间禁止ROS抢占控制权
 		{
 			Count=0;
 			return;
 		}
-=======
-		USART_ClearITPendingBit(USART2,USART_IT_RXNE);
-		Usart_Receive = USART_ReceiveData(USART2);//Read Data 读数据
->>>>>>> lqs_once
 		Mode=ROS_Mode;//ros控制时，将小车模式设为ROS模式
 //		if(Time_count < CONTROL_DELAY)
 //		{
