@@ -32,7 +32,7 @@ typedef enum {
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
-#define TIMED_TURN_TICKS 30u  /* 可调：每个计数周期为10 ms */
+#define TIMED_TURN_TICKS 20u  /* 可调：每个计数周期为10 ms */
 
 EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
 static u16 timed_turn_timer = 0;
@@ -142,18 +142,18 @@ void IRDM_line_inspection(void)
             turn_diff = 0;
             break;
         case STATE_DIAG_RIGHT: // DH1+DH3 对角偏右
-            turn_diff = -TurnMinAngle;
+            //turn_diff = -TurnMinAngle;
             break;
         case STATE_LEFT_90_A: // 左直角弯
 		case STATE_LEFT_90_B: // 左直角弯
-            turn_diff = Turn90Angle;
+            //turn_diff = Turn90Angle;
             break;
         case STATE_RIGHT_90_A: // 右直角弯
 		case STATE_RIGHT_90_B: // 右直角弯
-            turn_diff = -Turn90Angle;
+            //turn_diff = -Turn90Angle;
             break;
         case STATE_LEFT_BIG://左大弯
-            turn_diff = TurnMaxAngle;
+            //turn_diff = TurnMaxAngle;
             break;
         case STATE_RIGHT_BIG://右大弯
             turn_diff = -TurnMaxAngle;
