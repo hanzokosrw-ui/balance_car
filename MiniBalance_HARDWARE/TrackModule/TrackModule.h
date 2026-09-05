@@ -30,7 +30,7 @@ void TrackModule_Init(void);
 void IRDM_line_inspection(void);
 u8 IRDM_Line_Seen(void);   // 1=检测到线（绕障后找线用）
 u8 EightTrack_IsIdle(void); // 1=特殊路况状态机空闲（避障触发互斥用）
-void EightTrack_Reset(void); // 重置8字状态机（避障抢占/第一圈终点重置时调用）
+void EightTrack_Reset(void); // 重置8字状态机（第一圈终点重置时调用）
 
 typedef enum {
     EIGHT_TRACK_IDLE = 0,

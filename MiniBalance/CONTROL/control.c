@@ -412,12 +412,11 @@ void Avoid_State_Machine(void)
 	switch(avoid_state)
 	{
 		case AVOID_IDLE:                                 // 待机：连续N次测到障碍才触发绕障
-			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 避障优先级最高：8字处理中也可触发（触发时重置8字状态机），排除0/无效读数
+			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 避障优先级最高：8字处理中也可触发；避障与巡线互不干扰（巡线状态冻结，绕完续跑）
 			{
 				if(++avoid_cnt >= AVOID_TRIG_CNT)
 				{
 					avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; avoid_mm=0;
-					EightTrack_Reset();                  // 放弃当前8字特殊处理，绕完回巡线重新识别
 					if(Mode==IRDM_Line_Patrol_Mode){ Mode=Ultrasonic_Avoid_Mode; avoid_ret=1; }  //巡线遇障→借道模式7，绕完回巡线
 					else avoid_ret=0;                                                              //独立模式7：绕完停在模式7
 				}

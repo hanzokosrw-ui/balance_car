@@ -255,7 +255,7 @@ u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
 	return (s != STATE_LOST && s != STATE_END);
 }
 
-// Function: EightTrack_Reset - 重置8字状态机（避障抢占/第一圈终点时调用；不动圈数计数与边沿标志）
+// Function: EightTrack_Reset - 重置8字状态机（第一圈终点时调用；不动圈数计数与边沿标志）
 void EightTrack_Reset(void)
 {
     eight_track_state = EIGHT_TRACK_IDLE;
