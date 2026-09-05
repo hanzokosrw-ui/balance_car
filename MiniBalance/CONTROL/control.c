@@ -10,7 +10,7 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 #define AVOID_FWD1_MM       30          // 前行1里程（mm，原100ms@300mm/s）
 #define AVOID_FWD2_MM      (AVOID_TRIG_DIST*0.8)          // 前行2里程（mm，须大于障碍长度+余量）
 #define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*10)          // 前行3找线最大里程（mm）兜底
-#define AVOID_FWD_SPEED_MM  100        // 绕障直行速度（mm/s，可调；独立于遥控/跟随的 Target_Velocity）
+#define AVOID_FWD_SPEED_MM  150        // 绕障直行速度（mm/s，可调；独立于遥控/跟随的 Target_Velocity）
 // ===== 特殊路况（8字轨道）定时转弯后的速度积分缩放（队友：防止转弯后猛冲）=====
 static float velocity_integral_scale_request = 1.0f;
 
