@@ -8,7 +8,7 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 #define AVOID_GYRO_SCALE   16.4f        // 陀螺仪灵敏度 LSB/(°/s)
 #define AVOID_TURN_MAX_MS  50           // 单次转弯超时（500ms）兜底
 #define AVOID_FWD1_MM       30          // 前行1里程（mm，原100ms@300mm/s）
-#define AVOID_FWD2_MM      (AVOID_TRIG_DIST)          // 前行2里程（mm，须大于障碍长度+余量）
+#define AVOID_FWD2_MM      (AVOID_TRIG_DIST*0.7)          // 前行2里程（mm，须大于障碍长度+余量）
 #define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*100)          // 前行3找线最大里程（mm）兜底
 
 // ===== 特殊路况（8字轨道）定时转弯后的速度积分缩放（队友：防止转弯后猛冲）=====
@@ -412,11 +412,12 @@ void Avoid_State_Machine(void)
 	switch(avoid_state)
 	{
 		case AVOID_IDLE:                                 // 待机：连续N次测到障碍才触发绕障
-			if(EightTrack_IsIdle() && Distance>20 && Distance<AVOID_TRIG_DIST)   // 特殊路况(8字)处理中不触发避障，排除0/无效读数
+			if(Distance>20 && Distance<AVOID_TRIG_DIST)   // 避障优先级最高：8字处理中也可触发（触发时重置8字状态机），排除0/无效读数
 			{
 				if(++avoid_cnt >= AVOID_TRIG_CNT)
 				{
 					avoid_cnt=0; avoid_state=AVOID_TURN_R1; avoid_angle=0; avoid_timer=0; avoid_mm=0;
+					EightTrack_Reset();                  // 放弃当前8字特殊处理，绕完回巡线重新识别
 					if(Mode==IRDM_Line_Patrol_Mode){ Mode=Ultrasonic_Avoid_Mode; avoid_ret=1; }  //巡线遇障→借道模式7，绕完回巡线
 					else avoid_ret=0;                                                              //独立模式7：绕完停在模式7
 				}

@@ -39,11 +39,13 @@ EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
 static u16 timed_turn_timer = 0;
 static u16 special_lock_timer = 0;      /* >0=屏蔽期：间隔时间内不识别/捕获其他特殊状态 */
 static u8 eight_track_segment_flag = 0; /* 0=未执行，1=第一段完成，2=两段完成 */
+static u8 lap_count = 0;                /* 已识别终点圈数：0=第一圈,1=第二圈(终点才停车) */
 
 // ===== 巡线功能函数（输出两电机目标速度） =====
 void IRDM_line_inspection(void)
 {
     static int last_state = 0;// 记录上一次的状态
+    static u8 prev_sensor_end = 0;   // 上一拍是否压0000（终点边沿检测）
     int timed_turn_diff = 0;
 
     // 读取传感器状态：4个传感器组合值
@@ -138,10 +140,21 @@ void IRDM_line_inspection(void)
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
-       case STATE_END:// 终点停车：直接切回普通模式
+       case STATE_END:// 终点识别：第一圈不停车并重置8字状态机，第二圈停车
 			turn_diff = 0;
 			if(eight_track_state == EIGHT_TRACK_IDLE && timed_turn_diff == 0 && special_lock_timer == 0)
-				Mode = Normal_Mode;		//屏蔽期(转弯刚回正压十字)内不判终点，防误停车
+			{
+				if(prev_sensor_end == 0)			// 进入0000的边沿才判，宽终点线只算一次
+				{
+					if(lap_count == 0)			// 第一圈：不停车，重置8字状态机继续跑第二圈
+					{
+						lap_count = 1;
+						EightTrack_Reset();
+						special_lock_timer = SPECIAL_LOCK_TICKS;	// 屏蔽同一终点线的残留多拍
+					}
+					else Mode = Normal_Mode;			    // 第二圈终点：停车
+				}
+			}
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
@@ -194,6 +207,7 @@ void IRDM_line_inspection(void)
 	{
 		last_state=turn_diff;
 	}
+	prev_sensor_end = (sensor_state == STATE_END);	// 记录本拍是否0000，供下一拍终点边沿判定
 	// 转向速度越大，基础速度越低
 	if(fabs(turn_diff)<ForwardLimit)
 	{
@@ -220,6 +234,7 @@ void TrackModule_Init(void)
     timed_turn_timer = 0;
     special_lock_timer = 0;
     eight_track_segment_flag = 0;
+    lap_count = 0;
 
     // 使能传感器引脚时钟（引脚宏在 TrackModule.h 中配置）
     RCC_APB2PeriphClockCmd(TRACK_GPIO_CLK1 | TRACK_GPIO_CLK2, ENABLE);
@@ -238,6 +253,15 @@ u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
 {
 	int s = (DH1<<3)|(DH2<<2)|(DH3<<1)|DH4;
 	return (s != STATE_LOST && s != STATE_END);
+}
+
+// Function: EightTrack_Reset - 重置8字状态机（避障抢占/第一圈终点时调用；不动圈数计数与边沿标志）
+void EightTrack_Reset(void)
+{
+    eight_track_state = EIGHT_TRACK_IDLE;
+    timed_turn_timer = 0;
+    eight_track_segment_flag = 0;
+    special_lock_timer = 0;
 }
 
 // Function: EightTrack_IsIdle - 特殊路况（8字轨道）状态机是否空闲（避障触发互斥用）
