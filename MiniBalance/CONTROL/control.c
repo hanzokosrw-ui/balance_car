@@ -8,9 +8,9 @@ short Accel_Y,Accel_Z,Accel_X,Accel_Angle_x,Accel_Angle_y,Gyro_X,Gyro_Z,Gyro_Y;
 #define AVOID_GYRO_SCALE   16.4f        // 陀螺仪灵敏度 LSB/(°/s)
 #define AVOID_TURN_MAX_MS  50           // 单次转弯超时（500ms）兜底
 #define AVOID_FWD1_MM       30          // 前行1里程（mm，原100ms@300mm/s）
-#define AVOID_FWD2_MM      (AVOID_TRIG_DIST*0.6)          // 前行2里程（mm，须大于障碍长度+余量）
-#define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*100)          // 前行3找线最大里程（mm）兜底
-
+#define AVOID_FWD2_MM      (AVOID_TRIG_DIST*0.8)          // 前行2里程（mm，须大于障碍长度+余量）
+#define AVOID_FWD3_MAX_MM  (AVOID_FWD1_MM*10)          // 前行3找线最大里程（mm）兜底
+#define AVOID_FWD_SPEED_MM  100        // 绕障直行速度（mm/s，可调；独立于遥控/跟随的 Target_Velocity）
 // ===== 特殊路况（8字轨道）定时转弯后的速度积分缩放（队友：防止转弯后猛冲）=====
 static float velocity_integral_scale_request = 1.0f;
 
@@ -139,7 +139,7 @@ int Velocity(int encoder_left,int encoder_right)
 		if(avoid_state != AVOID_IDLE)
 		{
 			if(avoid_state==AVOID_FWD1||avoid_state==AVOID_FWD2||avoid_state==AVOID_FWD3)
-				Movement=Target_Velocity/Perimeter/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision*2;  //前行绕障
+				Movement=AVOID_FWD_SPEED_MM/Perimeter/Control_Frequency*EncoderMultiples*Reduction_Ratio*Encoder_precision*2;  //前行绕障（独立速度）
 			else
 				Movement=0;          //转弯阶段先停车
 		}
