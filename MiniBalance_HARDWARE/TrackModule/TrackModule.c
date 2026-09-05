@@ -32,10 +32,12 @@ typedef enum {
 float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
-#define TIMED_TURN_TICKS 20u  /* 可调：每个计数周期为10 ms */
+#define TIMED_TURN_TICKS 15u  /* 可调：每个计数周期为10 ms */
+#define SPECIAL_LOCK_TICKS 100u /* 特殊状态切换后的特征识别屏蔽期(1tick=10ms,可调) */
 
 EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
 static u16 timed_turn_timer = 0;
+static u16 special_lock_timer = 0;      /* >0=屏蔽期：间隔时间内不识别/捕获其他特殊状态 */
 static u8 eight_track_segment_flag = 0; /* 0=未执行，1=第一段完成，2=两段完成 */
 
 // ===== 巡线功能函数（输出两电机目标速度） =====
@@ -47,8 +49,12 @@ void IRDM_line_inspection(void)
     // 读取传感器状态：4个传感器组合值
     int sensor_state = (DH1 << 3) | (DH2 << 2) | (DH3 << 1) | DH4;
 
+    /* 屏蔽期倒计时：处理完一个特殊状态后的间隔时间内不识别其他特殊状态 */
+    if(special_lock_timer > 0) special_lock_timer--;
+
     /* 第一段：1000/1100 -> 定时原地右转 -> 等待0000 -> 左转。 */
     if (eight_track_state == EIGHT_TRACK_IDLE && eight_track_segment_flag == 0 &&
+        special_lock_timer == 0 &&
         (sensor_state == STATE_RIGHT_90_A || sensor_state == STATE_RIGHT_90_B))
     {
         eight_track_state = EIGHT_TRACK_FIRST_TURN_RIGHT;
@@ -62,12 +68,13 @@ void IRDM_line_inspection(void)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_FIRST_WAIT_END;
+            special_lock_timer = SPECIAL_LOCK_TICKS;   /* 转弯结束：进入特征识别屏蔽期 */
             Velocity_Request_Integral_Scale(0.2f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_FIRST_WAIT_END)
     {
-        if (sensor_state == STATE_END)
+        if (special_lock_timer == 0 && sensor_state == STATE_END)
         {
             eight_track_state = EIGHT_TRACK_FIRST_TURN_LEFT;
             timed_turn_timer = 0;
@@ -77,17 +84,19 @@ void IRDM_line_inspection(void)
     if (eight_track_state == EIGHT_TRACK_FIRST_TURN_LEFT)
     {
         timed_turn_diff = 80;
-        if (++timed_turn_timer >= TIMED_TURN_TICKS)
+        if (++timed_turn_timer >= TIMED_TURN_TICKS+3)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_WAIT_LEFT_ANGLE;
             eight_track_segment_flag = 1;
+            special_lock_timer = SPECIAL_LOCK_TICKS;   /* 转弯结束：进入特征识别屏蔽期 */
             Velocity_Request_Integral_Scale(0.2f);
         }
     }
 
     /* 第二段：0001/0011 -> 定时原地左转 -> 等待0000 -> 右转。 */
     if (eight_track_state == EIGHT_TRACK_WAIT_LEFT_ANGLE && eight_track_segment_flag == 1 &&
+        special_lock_timer == 0 &&
         (sensor_state == STATE_LEFT_90_A || sensor_state == STATE_LEFT_90_B))
     {
         eight_track_state = EIGHT_TRACK_SECOND_TURN_LEFT;
@@ -97,16 +106,17 @@ void IRDM_line_inspection(void)
     if (eight_track_state == EIGHT_TRACK_SECOND_TURN_LEFT)
     {
         timed_turn_diff = 80;
-        if (++timed_turn_timer >= TIMED_TURN_TICKS)
+        if (++timed_turn_timer >= TIMED_TURN_TICKS+5)
         {
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_SECOND_WAIT_END;
+            special_lock_timer = SPECIAL_LOCK_TICKS;   /* 转弯结束：进入特征识别屏蔽期 */
             Velocity_Request_Integral_Scale(0.2f);
         }
     }
     else if (eight_track_state == EIGHT_TRACK_SECOND_WAIT_END)
     {
-        if (sensor_state == STATE_END)
+        if (special_lock_timer == 0 && sensor_state == STATE_END)
         {
             eight_track_state = EIGHT_TRACK_SECOND_TURN_RIGHT;
             timed_turn_timer = 0;
@@ -121,6 +131,7 @@ void IRDM_line_inspection(void)
             timed_turn_timer = 0;
             eight_track_state = EIGHT_TRACK_IDLE;
             eight_track_segment_flag = 2;
+            special_lock_timer = SPECIAL_LOCK_TICKS;   /* 转弯结束：进入特征识别屏蔽期 */
             Velocity_Request_Integral_Scale(0.2f);
         }
     }
@@ -129,8 +140,8 @@ void IRDM_line_inspection(void)
     {
        case STATE_END:// 终点停车：直接切回普通模式
 			turn_diff = 0;
-			if(eight_track_state == EIGHT_TRACK_IDLE && timed_turn_diff == 0)
-				Mode = Normal_Mode;		//状态机外检测到0000，退出巡线并停车
+			if(eight_track_state == EIGHT_TRACK_IDLE && timed_turn_diff == 0 && special_lock_timer == 0)
+				Mode = Normal_Mode;		//屏蔽期(转弯刚回正压十字)内不判终点，防误停车
             break;
         case STATE_LEFT_INNER: // 仅左内传感器，偏左微调
             turn_diff = TurnMinAngle;
@@ -194,7 +205,7 @@ void IRDM_line_inspection(void)
 		turn_diff = timed_turn_diff;
 		base_speed_mm = 0;
 	}
-	else if(sensor_state == STATE_END && eight_track_state == EIGHT_TRACK_IDLE)
+	else if(special_lock_timer == 0 && sensor_state == STATE_END && eight_track_state == EIGHT_TRACK_IDLE)
 	{
 		base_speed_mm = 0;
 	}
@@ -207,6 +218,7 @@ void TrackModule_Init(void)
 
     eight_track_state = EIGHT_TRACK_IDLE;
     timed_turn_timer = 0;
+    special_lock_timer = 0;
     eight_track_segment_flag = 0;
 
     // 使能传感器引脚时钟（引脚宏在 TrackModule.h 中配置）
