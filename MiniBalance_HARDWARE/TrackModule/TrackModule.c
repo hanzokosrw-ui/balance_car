@@ -33,12 +33,17 @@ float base_speed_mm = 0;// 基础速度（mm/s）
 float turn_diff = 0;    // 转向差速
 
 #define TIMED_TURN_TICKS 18u  /* 可调：每个计数周期为10 ms */
+#define EIGHT_TRACK_ENABLE 0u /* 竞速分支开关：0=禁用8字特殊路况状态机(特殊状态只识别停车两圈)，1=启用8字轨道动作 */
 #define SPECIAL_LOCK_TICKS 100u /* 特殊状态切换后的特征识别屏蔽期(1tick=10ms,可调) */
 
 EightTrackState_t eight_track_state = EIGHT_TRACK_IDLE;
+#if EIGHT_TRACK_ENABLE
 static u16 timed_turn_timer = 0;
+#endif
 static u16 special_lock_timer = 0;      /* >0=屏蔽期：间隔时间内不识别/捕获其他特殊状态 */
+#if EIGHT_TRACK_ENABLE
 static u8 eight_track_segment_flag = 0; /* 0=未执行，1=第一段完成，2=两段完成 */
+#endif
 static u8 lap_count = 0;                /* 已识别终点圈数：0=第一圈,1=第二圈(终点才停车) */
 
 // ===== 巡线功能函数（输出两电机目标速度） =====
@@ -54,6 +59,7 @@ void IRDM_line_inspection(void)
     /* 屏蔽期倒计时：处理完一个特殊状态后的间隔时间内不识别其他特殊状态 */
     if(special_lock_timer > 0) special_lock_timer--;
 
+#if EIGHT_TRACK_ENABLE
     /* 第一段：1000/1100 -> 定时原地右转 -> 等待0000 -> 左转。 */
     if (eight_track_state == EIGHT_TRACK_IDLE && eight_track_segment_flag == 0 &&
         special_lock_timer == 0 &&
@@ -137,6 +143,7 @@ void IRDM_line_inspection(void)
             Velocity_Request_Integral_Scale(0.2f);
         }
     }
+#endif /* EIGHT_TRACK_ENABLE */
         // ===== 状态判断：设置转向差速 =====
     switch (sensor_state)
     {
@@ -231,9 +238,13 @@ void TrackModule_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 
     eight_track_state = EIGHT_TRACK_IDLE;
+#if EIGHT_TRACK_ENABLE
     timed_turn_timer = 0;
+#endif
     special_lock_timer = 0;
+#if EIGHT_TRACK_ENABLE
     eight_track_segment_flag = 0;
+#endif
     lap_count = 0;
 
     // 使能传感器引脚时钟（引脚宏在 TrackModule.h 中配置）
@@ -259,8 +270,10 @@ u8 IRDM_Line_Seen(void)   // 1=检测到线，0=丢线/终点
 void EightTrack_Reset(void)
 {
     eight_track_state = EIGHT_TRACK_IDLE;
+#if EIGHT_TRACK_ENABLE
     timed_turn_timer = 0;
     eight_track_segment_flag = 0;
+#endif
     special_lock_timer = 0;
 }
 
